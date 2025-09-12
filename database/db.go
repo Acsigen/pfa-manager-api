@@ -17,7 +17,7 @@ func InitDB() {
 	var err error
 
 	// Open the database file
-	DB, err = sql.Open("sqlite3", "../data/sqlite.db")
+	DB, err = sql.Open("sqlite3", "./data/sqlite.db")
 	if err != nil {
 		panic("The database could not be accessed")
 	}

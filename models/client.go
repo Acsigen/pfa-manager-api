@@ -85,3 +85,24 @@ func Get_client_list() ([]Client, error) {
 	// Return the clients and no error
 	return clients, nil
 }
+
+func GetEventById(id int64) (*Client, error) {
+	query := "SELECT * FROM clients WHERE id == ?"
+	row := database.DB.QueryRow(query, id)
+
+	var client Client
+	err := row.Scan(&client.ID,
+		&client.Name,
+		&client.Address,
+		&client.Contact_person,
+		&client.Country,
+		&client.Phone_number,
+		&client.ONRC_no,
+		&client.CUI,
+		&client.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &client, nil
+}
