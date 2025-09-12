@@ -1,22 +1,15 @@
-FROM python:3.13-slim
+FROM golang:1.25-alpine AS builder
 
-WORKDIR /pfa-manager-api
+WORKDIR /app-builder
 
-COPY ./requirements.txt /pfa-manager-api/requirements.txt
-
-RUN pip install -r requirements.txt
-
-COPY ./app ./app
-COPY ./controllers ./controllers
-COPY ./database-migrations ./database-migrations
+COPY ./main.go ./main.go
+COPY ./database ./database
 COPY ./models ./models
 
-RUN mkdir -p /pfa-manager-api/data && touch ./data/sqlite.db
+RUN go mod tidy && go build
 
-VOLUME ./data
+FROM golang:1.23-alpine AS pfa-manager-api
 
-EXPOSE 8000
+WORKDIR /app
 
-ENTRYPOINT ["fastapi"]
-
-CMD ["run", "--reload"]
+COPY --from=builder /app-builder/pfa-manager-api ./pfa-manager-api
