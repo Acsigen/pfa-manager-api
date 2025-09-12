@@ -44,6 +44,27 @@ func (c Client) Add() error {
 	return err
 }
 
+// Add a new client
+func (c Client) Update() error {
+	// Build the query, use ? to avoid SQL injection
+	query := `UPDATE clients
+	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?, user_id = ?
+	WHERE id = ?`
+
+	// Prepare the query
+	statement, err := database.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	// Close the statement when the function call ends
+	defer statement.Close()
+
+	// Execute the query
+	_, err = statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.UserID, c.ID)
+	return err
+}
+
 // Get the list of clients, return a list of clients and error type
 func Get_client_list() ([]Client, error) {
 	// Build the query
