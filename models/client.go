@@ -86,7 +86,9 @@ func Get_client_list() ([]Client, error) {
 	return clients, nil
 }
 
+// Retrieve the client with a specific ID
 func GetEventById(id int64) (*Client, error) {
+	// We build the query this way to avoid SQL injection
 	query := "SELECT * FROM clients WHERE id == ?"
 	row := database.DB.QueryRow(query, id)
 
