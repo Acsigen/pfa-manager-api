@@ -10,4 +10,6 @@ func RegisterRoutes(server *gin.Engine) {
 	server.GET("/clients/:id", get_client)
 	// Add new client handler
 	server.POST("/clients", create_client)
+	// Update client
+	server.PUT("/clients/:id", update_client)
 }

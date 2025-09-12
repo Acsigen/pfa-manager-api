@@ -58,3 +58,38 @@ func create_client(context *gin.Context) {
 
 	context.JSON(http.StatusCreated, gin.H{"message": "Client created", "client": client})
 }
+
+func update_client(context *gin.Context) {
+	// Retrieve the path parameter
+	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
+		return
+	}
+
+	_, err = models.GetEventById(client_id)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client."})
+		return
+	}
+
+	var updatedClient models.Client
+	err = context.ShouldBindJSON(&updatedClient)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse client data."})
+	}
+
+	updatedClient.ID = client_id
+
+	updatedClient.UserID = 1
+
+	err = updatedClient.Update()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update client."})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Client updated"})
+}
