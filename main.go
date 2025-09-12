@@ -22,6 +22,7 @@ func main() {
 	// root path listener
 	server.GET("/", welcome_message)
 
+	// register routes from the routes package
 	routes.RegisterRoutes(server)
 	// Run the server
 	server.Run("127.0.0.1:8000")

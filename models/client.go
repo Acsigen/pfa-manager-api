@@ -1,6 +1,10 @@
 package models
 
-import "github.com/Acsigen/pfa-manager-api/database"
+import (
+	"fmt"
+
+	"github.com/Acsigen/pfa-manager-api/database"
+)
 
 // Client model, used tags to set the required items
 type Client struct {
@@ -128,4 +132,20 @@ func GetEventById(id int64) (*Client, error) {
 	}
 
 	return &client, nil
+}
+
+func (c Client) Delete(id int64) error {
+	query := "DELETE FROM clients WHERE id == ?"
+	statement, err := database.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(id)
+
+	fmt.Println(err)
+
+	return err
 }
