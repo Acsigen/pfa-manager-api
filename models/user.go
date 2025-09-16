@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/Acsigen/pfa-manager-api/database"
+	"github.com/Acsigen/pfa-manager-api/utils"
 )
 
 type User struct {
@@ -24,8 +25,13 @@ func (u User) Register() error {
 	// Close the statement when the function call ends
 	defer statement.Close()
 
+	hashed_pass, err := utils.HashPassword(u.Password)
+	if err != nil {
+		return err
+	}
+
 	// Execute the query
-	res, err := statement.Exec(u.FirstName, u.LastName, u.PhoneNumber, u.EmailAddress, u.Password)
+	res, err := statement.Exec(u.FirstName, u.LastName, u.PhoneNumber, u.EmailAddress, hashed_pass)
 	if err != nil {
 		return err
 	}

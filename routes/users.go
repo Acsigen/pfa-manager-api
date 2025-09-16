@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/Acsigen/pfa-manager-api/models"
@@ -12,8 +11,6 @@ func signup(context *gin.Context) {
 	var user models.User
 
 	err := context.ShouldBindJSON(&user)
-
-	fmt.Println(err)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
@@ -27,5 +24,6 @@ func signup(context *gin.Context) {
 		return
 	}
 
+	user.Password = "REDACTED"
 	context.JSON(http.StatusCreated, gin.H{"message": "User registered", "client": user})
 }
