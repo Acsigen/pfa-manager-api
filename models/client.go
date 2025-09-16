@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-
 	"github.com/Acsigen/pfa-manager-api/database"
 )
 
@@ -144,8 +142,6 @@ func (c Client) Delete(id int64) error {
 	defer statement.Close()
 
 	_, err = statement.Exec(id)
-
-	fmt.Println(err)
 
 	return err
 }

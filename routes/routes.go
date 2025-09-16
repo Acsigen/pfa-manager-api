@@ -14,4 +14,7 @@ func RegisterRoutes(server *gin.Engine) {
 	server.PUT("/clients/:id", update_client)
 	// Delete client
 	server.DELETE("/clients/:id", delete_client)
+
+	// Register a new user
+	server.POST("/signup", signup)
 }
