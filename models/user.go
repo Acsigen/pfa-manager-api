@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/Acsigen/pfa-manager-api/database"
 	"github.com/Acsigen/pfa-manager-api/utils"
 )
@@ -43,4 +45,24 @@ func (u User) Register() error {
 	u.ID = id
 	return err
 
+}
+
+func (u User) ValidateCredentials() error {
+	query := "SELECT password FROM users where email_address = ?"
+
+	row := database.DB.QueryRow(query, u.EmailAddress)
+	var retrievedPassword string
+	err := row.Scan(&retrievedPassword)
+
+	if err != nil {
+		return errors.New("invalid credentials")
+	}
+
+	isValidPassword := utils.CheckHash(u.Password, retrievedPassword)
+
+	if !isValidPassword {
+		return errors.New("invalid credentials")
+	}
+
+	return nil
 }
