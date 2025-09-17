@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/Acsigen/pfa-manager-api/models"
-	"github.com/Acsigen/pfa-manager-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +26,7 @@ func get_client(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
 		return
 	}
-	client, err := models.GetEventById(client_id)
+	client, err := models.GetClientById(client_id)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client."})
@@ -38,30 +37,16 @@ func get_client(context *gin.Context) {
 }
 
 func create_client(context *gin.Context) {
-	token := context.Request.Header.Get("Authorization")
-
-	if token == "" {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Please login before performing this action"})
-		return
-	}
-
-	userId, err := utils.ValidateToken(token)
-
-	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Please login before performing this action"})
-		return
-	}
-
 	var client models.Client
 
-	err = context.ShouldBindJSON(&client)
+	err := context.ShouldBindJSON(&client)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
 		return
 	}
 
-	client.UserID = userId
+	client.UserID = context.GetInt64("userId")
 
 	err = client.Add()
 
@@ -81,10 +66,16 @@ func update_client(context *gin.Context) {
 		return
 	}
 
-	_, err = models.GetEventById(client_id)
+	userId := context.GetInt64("userId")
+	client, err := models.GetClientById(client_id)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client."})
+		return
+	}
+
+	if client.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to update this client"})
 		return
 	}
 
@@ -116,10 +107,17 @@ func delete_client(context *gin.Context) {
 		return
 	}
 
-	client, err := models.GetEventById(client_id)
+	userId := context.GetInt64("userId")
+
+	client, err := models.GetClientById(client_id)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for deletion."})
+		return
+	}
+
+	if client.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to delete this client"})
 		return
 	}
 
