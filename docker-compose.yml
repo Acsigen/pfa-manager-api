@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     container_name: pfa-api-manager
     restart: unless-stopped
+    environment:
+      - PFA_SECRET_KEY
     volumes:
       - pfa-data:/app/data
     ports:
