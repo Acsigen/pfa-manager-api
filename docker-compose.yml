@@ -1,6 +1,6 @@
 services:
   pfa-api-manager:
-    image: acsigen/pfa-api-manager:v0.3.0
+    image: acsigen/pfa-api-manager:v0.3.1
     build:
       context: .
       dockerfile: Dockerfile
