@@ -33,6 +33,9 @@ func RegisterRoutes(server *gin.Engine) {
 	// Delete client
 	authenticated.DELETE("/clients/:id", delete_client)
 
+	// Add contracts
+	authenticated.POST("/clients/:id/contracts", add_contract)
+
 	// Register a new user
 	server.POST("/signup", signup)
 	// Login to get the JWT Token
