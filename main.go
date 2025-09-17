@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,6 +16,11 @@ func welcome_message(context *gin.Context) {
 }
 
 func main() {
+	var secretKey string = os.Getenv("PFA_SECRET_KEY")
+
+	if secretKey == "" {
+		panic("PFA_SECRET_KEY is missing")
+	}
 	// Init db
 	database.InitDB()
 	// Initialise the server
