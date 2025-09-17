@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     environment:
       - PFA_SECRET_KEY
+      - GIN_MODE=release
     volumes:
       - pfa-data:/app/data
     ports:

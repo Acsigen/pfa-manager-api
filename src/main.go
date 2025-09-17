@@ -31,5 +31,5 @@ func main() {
 	// register routes from the routes package
 	routes.RegisterRoutes(server)
 	// Run the server
-	server.Run("127.0.0.1:8000")
+	server.Run("0.0.0.0:8000")
 }
