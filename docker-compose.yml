@@ -1,0 +1,16 @@
+services:
+  pfa-api-manager:
+    image: acsigen/pfa-api-manager:v0.3.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pfa-api-manager
+    restart: unless-stopped
+    volumes:
+      - pfa-data:/app/data
+    ports:
+      - 8000:8000
+    
+volumes:
+  pfa-data:
+    name: pfa-data
