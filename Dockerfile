@@ -1,15 +1,17 @@
 FROM golang:1.25-alpine AS builder
 
-WORKDIR /app-builder
+WORKDIR /app
 
-COPY ./main.go ./main.go
-COPY ./database ./database
-COPY ./models ./models
+COPY ./src ./app
 
-RUN go mod tidy && go build
+RUN go build
 
 FROM golang:1.23-alpine AS pfa-manager-api
 
 WORKDIR /app
 
-COPY --from=builder /app-builder/pfa-manager-api ./pfa-manager-api
+COPY --from=builder /app/pfa-manager-api /app/pfa-manager-api
+
+VOLUME /app/data
+
+ENTRYPOINT ["/app/pfa-manager-api"]

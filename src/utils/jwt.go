@@ -2,13 +2,13 @@ package utils
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// TODO: Get from environment
-const secretKey = "supersecret"
+var secretKey string = os.Getenv("PFA_SECRET_KEY")
 
 func GenerateToken(email string, userId int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
