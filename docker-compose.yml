@@ -1,10 +1,13 @@
 services:
   pfa-api-manager:
-    image: acsigen/pfa-api-manager:v0.3.1
+    image: acsigen/pfa-manager-api
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pfa-api-manager
+      tags:
+        - acsigen/pfa-manager-api:v0.3.2
+        - acsigen/pfa-manager-api:latest
+    container_name: pfa-manager-api
     restart: unless-stopped
     environment:
       - PFA_SECRET_KEY
