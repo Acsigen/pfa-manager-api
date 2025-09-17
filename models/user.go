@@ -22,7 +22,7 @@ type UserLogin struct {
 	Password     string `binding:"required"`
 }
 
-func (u User) Register() error {
+func (u *User) Register() error {
 	query := "INSERT INTO users(first_name, last_name, phone_number, email_address, password) VALUES (?, ?, ?, ?, ?)"
 
 	statement, err := database.DB.Prepare(query)
@@ -53,7 +53,7 @@ func (u User) Register() error {
 
 }
 
-func (u UserLogin) ValidateCredentials() error {
+func (u *UserLogin) ValidateCredentials() error {
 	query := "SELECT id,password FROM users where email_address = ?"
 
 	row := database.DB.QueryRow(query, u.EmailAddress)

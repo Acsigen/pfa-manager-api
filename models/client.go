@@ -14,11 +14,11 @@ type Client struct {
 	Name           string `binding:"required"`
 	ONRC_no        string `binding:"required"`
 	Phone_number   string
-	UserID         int
+	UserID         int64
 }
 
 // Add a new client
-func (c Client) Add() error {
+func (c *Client) Add() error {
 	// Build the query, use ? to avoid SQL injection
 	query := `INSERT INTO clients(name, address, contact_person, country, phone_number, onrc_no, cui, user_id)
 	VALUES (?,?,?,?,?,?,?,?)`

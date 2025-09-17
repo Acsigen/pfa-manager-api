@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/Acsigen/pfa-manager-api/models"
+	"github.com/Acsigen/pfa-manager-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,17 +38,30 @@ func get_client(context *gin.Context) {
 }
 
 func create_client(context *gin.Context) {
+	token := context.Request.Header.Get("Authorization")
+
+	if token == "" {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Please login before performing this action"})
+		return
+	}
+
+	userId, err := utils.ValidateToken(token)
+
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Please login before performing this action"})
+		return
+	}
+
 	var client models.Client
 
-	err := context.ShouldBindJSON(&client)
+	err = context.ShouldBindJSON(&client)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
 		return
 	}
 
-	client.ID = 1
-	client.UserID = 1
+	client.UserID = userId
 
 	err = client.Add()
 
