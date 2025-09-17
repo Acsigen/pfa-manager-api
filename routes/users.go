@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Acsigen/pfa-manager-api/models"
+	"github.com/Acsigen/pfa-manager-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +30,7 @@ func signup(context *gin.Context) {
 }
 
 func login(context *gin.Context) {
-	var user models.User
+	var user models.UserLogin
 
 	err := context.ShouldBindJSON(&user)
 
@@ -45,5 +46,12 @@ func login(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Login OK"})
+	jwtToken, err := utils.GenerateToken(user.EmailAddress, user.ID)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Login OK", "token": jwtToken})
 }

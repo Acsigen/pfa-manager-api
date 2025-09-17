@@ -16,6 +16,12 @@ type User struct {
 	Password     string `binding:"required"`
 }
 
+type UserLogin struct {
+	ID           int64
+	EmailAddress string `binding:"required"`
+	Password     string `binding:"required"`
+}
+
 func (u User) Register() error {
 	query := "INSERT INTO users(first_name, last_name, phone_number, email_address, password) VALUES (?, ?, ?, ?, ?)"
 
@@ -47,12 +53,12 @@ func (u User) Register() error {
 
 }
 
-func (u User) ValidateCredentials() error {
-	query := "SELECT password FROM users where email_address = ?"
+func (u UserLogin) ValidateCredentials() error {
+	query := "SELECT id,password FROM users where email_address = ?"
 
 	row := database.DB.QueryRow(query, u.EmailAddress)
 	var retrievedPassword string
-	err := row.Scan(&retrievedPassword)
+	err := row.Scan(&u.ID, &retrievedPassword)
 
 	if err != nil {
 		return errors.New("invalid credentials")
