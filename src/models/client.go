@@ -32,7 +32,7 @@ func (c *Client) Add() error {
 	// Close the statement when the function call ends
 	defer statement.Close()
 
-	// Execute the query
+	// Execute the query with the corresponding values for the `?` replacement
 	res, err := statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.UserID)
 	if err != nil {
 		return err
@@ -117,6 +117,7 @@ func GetClientById(id int64) (*Client, error) {
 	query := "SELECT * FROM clients WHERE id == ?"
 	row := database.DB.QueryRow(query, id)
 
+	// Scan the row and map the items to client properties
 	var client Client
 	err := row.Scan(&client.ID,
 		&client.Name,
@@ -131,19 +132,23 @@ func GetClientById(id int64) (*Client, error) {
 		return nil, err
 	}
 
+	// Return the client
 	return &client, nil
 }
 
 // Method to delete a client
 func (c Client) Delete(id int64) error {
+	// Query statement
 	query := "DELETE FROM clients WHERE id == ?"
 	statement, err := database.DB.Prepare(query)
 	if err != nil {
 		return err
 	}
 
+	// Close the statement when optimal
 	defer statement.Close()
 
+	// execute the query with the id of the client
 	_, err = statement.Exec(id)
 
 	return err
