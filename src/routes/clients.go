@@ -26,6 +26,8 @@ func get_client(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
 		return
 	}
+
+	// Get the client details from DB
 	client, err := models.GetClientById(client_id)
 
 	if err != nil {
@@ -33,6 +35,7 @@ func get_client(context *gin.Context) {
 		return
 	}
 
+	// Display the client details with proper response code
 	context.JSON(http.StatusOK, client)
 }
 

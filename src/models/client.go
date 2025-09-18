@@ -17,7 +17,7 @@ type Client struct {
 	UserID         int64
 }
 
-// Add a new client
+// Method for adding a new client
 func (c *Client) Add() error {
 	// Build the query, use ? to avoid SQL injection
 	query := `INSERT INTO clients(name, address, contact_person, country, phone_number, onrc_no, cui, user_id)
@@ -46,7 +46,7 @@ func (c *Client) Add() error {
 	return err
 }
 
-// Add a new client
+// Method for updating a client
 func (c Client) Update() error {
 	// Build the query, use ? to avoid SQL injection
 	query := `UPDATE clients
@@ -67,7 +67,8 @@ func (c Client) Update() error {
 	return err
 }
 
-// Get the list of clients, return a list of clients and error type
+// Function to get the list of clients, return a list of clients and error type
+// This is not required to be a method since we don't really use the struct to insert data, we just create a list of clients
 func Get_client_list() ([]Client, error) {
 	// Build the query
 	query := "SELECT * FROM clients"
@@ -109,7 +110,8 @@ func Get_client_list() ([]Client, error) {
 	return clients, nil
 }
 
-// Retrieve the client with a specific ID
+// Function to retrieve the client with a specific ID
+// This is not required to be a method since we don't really use the struct to insert data, we just retrieve a client from DB
 func GetClientById(id int64) (*Client, error) {
 	// We build the query this way to avoid SQL injection
 	query := "SELECT * FROM clients WHERE id == ?"
@@ -132,6 +134,7 @@ func GetClientById(id int64) (*Client, error) {
 	return &client, nil
 }
 
+// Method to delete a client
 func (c Client) Delete(id int64) error {
 	query := "DELETE FROM clients WHERE id == ?"
 	statement, err := database.DB.Prepare(query)
