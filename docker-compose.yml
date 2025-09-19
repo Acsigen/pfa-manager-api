@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
       tags:
-        - acsigen/pfa-manager-api:v0.3.2
+        - acsigen/pfa-manager-api:v0.5.0
         - acsigen/pfa-manager-api:latest
     container_name: pfa-manager-api
     restart: unless-stopped
