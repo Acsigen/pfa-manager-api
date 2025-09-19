@@ -43,6 +43,13 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.GET("/clients/:id/contracts/:contract_id/wo/:wo_id", get_wo)
 	authenticated.DELETE("/clients/:id/contracts/:contract_id/wo/:wo_id", delete_wo)
 
+	// Activity Reports
+	// authenticated.POST("/clients/:id/contracts/:contract_id/wo/:wo_id", add_ar)
+	// authenticated.GET("/clients/:id/contracts/:contract_id/wo", get_wo_list)
+	// authenticated.PUT("/clients/:id/contracts/:contract_id/wo/:wo_id", update_wo)
+	// authenticated.GET("/clients/:id/contracts/:contract_id/wo/:wo_id", get_wo)
+	// authenticated.DELETE("/clients/:id/contracts/:contract_id/wo/:wo_id", delete_wo)
+
 	// Register a new user
 	server.POST("/signup", signup)
 	// Login to get the JWT Token
