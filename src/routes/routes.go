@@ -22,19 +22,19 @@ func RegisterRoutes(server *gin.Engine) {
 	// Group clients requests and protect all of them with the authentication method
 	authenticated := server.Group("/")
 	authenticated.Use(middlewares.Authenticate)
-	// clients path listener
+	// Clients
 	authenticated.GET("/clients", get_client_list)
-	// retrieve clients by id
 	authenticated.GET("/clients/:id", get_client)
-	// Add new client handler
 	authenticated.POST("/clients", create_client)
-	// Update client
 	authenticated.PUT("/clients/:id", update_client)
-	// Delete client
 	authenticated.DELETE("/clients/:id", delete_client)
 
-	// Add contracts
+	// Contracts
 	authenticated.POST("/clients/:id/contracts", add_contract)
+	authenticated.GET("/clients/:id/contracts", get_contract_list)
+	authenticated.PUT("/clients/:id/contracts/:contract_id", update_contract)
+	authenticated.GET("/clients/:id/contracts/:contract_id", get_contract)
+	authenticated.DELETE("/clients/:id/contracts/:contract_id", delete_contract)
 
 	// Register a new user
 	server.POST("/signup", signup)
