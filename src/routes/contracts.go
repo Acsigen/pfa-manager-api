@@ -79,6 +79,22 @@ func add_contract(context *gin.Context) {
 	// Set the proper client ID
 	contract.ClientID = client_id
 
+	// Get the client based on ID from path parameter
+	client, err := models.GetClientById(client_id)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check"})
+		return
+	}
+
+	// Only the owner can update data
+	err = utils.CheckPermissions(contract.UserID, client.UserID)
+
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
 	// Add the contract to DB
 	err = contract.Add()
 
