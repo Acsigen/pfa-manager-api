@@ -103,7 +103,7 @@ func createTables() {
 
 	// Define the query to create the work orders table
 	createArTable := `
-	CREATE TABLE IF NOT EXISTS work_orders (
+	CREATE TABLE IF NOT EXISTS activity_reports (
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,
 		client_id INTEGER NOT NULL,
