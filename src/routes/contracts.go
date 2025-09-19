@@ -147,7 +147,7 @@ func update_contract(context *gin.Context) {
 	client, err := models.GetClientById(client_id)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client."})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check"})
 		return
 	}
 
@@ -204,17 +204,18 @@ func delete_contract(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check."})
 		return
 	}
-	contract, err := models.GetContractById(contract_id)
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch contract for deletion."})
-		return
-	}
 
 	// Only the owner can update data
 	err = utils.CheckPermissions(userId, client.UserID)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	contract, err := models.GetContractById(contract_id)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch contract for deletion."})
 		return
 	}
 
