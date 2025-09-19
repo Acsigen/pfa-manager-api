@@ -5,16 +5,30 @@ import (
 	"strconv"
 
 	"github.com/Acsigen/pfa-manager-api/models"
+	"github.com/Acsigen/pfa-manager-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
 // Display the client list
 func get_client_list(context *gin.Context) {
-	clients, err := models.Get_client_list()
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
+
+	// Get the clients list
+	clients, err := models.GetClientList(userId)
+
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch clients."})
 		return
 	}
+
+	// This won't need permissions check because we retrieve only the clients for the current user id
+	if clients == nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "No clients to show"})
+		return
+	}
+
+	// Return the clients if everything is ok
 	context.JSON(http.StatusOK, clients)
 }
 
@@ -26,6 +40,11 @@ func get_client(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
 		return
 	}
+
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
+
+	// Get the client details from DB
 	client, err := models.GetClientById(client_id)
 
 	if err != nil {
@@ -33,12 +52,23 @@ func get_client(context *gin.Context) {
 		return
 	}
 
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Display the client details with proper response code
 	context.JSON(http.StatusOK, client)
 }
 
+// Add a client to the database route
 func create_client(context *gin.Context) {
+	// Initialise the client model
 	var client models.Client
 
+	// Check for the JSON body of the request to match the model
 	err := context.ShouldBindJSON(&client)
 
 	if err != nil {
@@ -46,8 +76,10 @@ func create_client(context *gin.Context) {
 		return
 	}
 
+	// Get the current user ID from the gin context which was set by the authentication middleware
 	client.UserID = context.GetInt64("userId")
 
+	// Add the client to the db
 	err = client.Add()
 
 	if err != nil {
@@ -55,6 +87,7 @@ func create_client(context *gin.Context) {
 		return
 	}
 
+	// Display the added client as a confirmation
 	context.JSON(http.StatusCreated, gin.H{"message": "Client created", "client": client})
 }
 
@@ -66,7 +99,10 @@ func update_client(context *gin.Context) {
 		return
 	}
 
+	// Get the user id from the authentication middleware
 	userId := context.GetInt64("userId")
+
+	// Get the client based on ID from path parameter
 	client, err := models.GetClientById(client_id)
 
 	if err != nil {
@@ -74,11 +110,14 @@ func update_client(context *gin.Context) {
 		return
 	}
 
-	if client.UserID != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to update this client"})
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
+	// Initialise the updated client that should match the model
 	var updatedClient models.Client
 	err = context.ShouldBindJSON(&updatedClient)
 
@@ -86,16 +125,17 @@ func update_client(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse client data."})
 	}
 
+	// Set the proper client ID
 	updatedClient.ID = client_id
 
-	updatedClient.UserID = 1
-
+	// Update the client
 	err = updatedClient.Update()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update client."})
 		return
 	}
 
+	// Display a confirmation
 	context.JSON(http.StatusOK, gin.H{"message": "Client updated"})
 }
 
@@ -107,8 +147,10 @@ func delete_client(context *gin.Context) {
 		return
 	}
 
+	// Get the user id from the authentication middleware
 	userId := context.GetInt64("userId")
 
+	// Get the client based on ID from path parameter
 	client, err := models.GetClientById(client_id)
 
 	if err != nil {
@@ -116,11 +158,14 @@ func delete_client(context *gin.Context) {
 		return
 	}
 
-	if client.UserID != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to delete this client"})
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
+	// Delete the client
 	err = client.Delete(client_id)
 
 	if err != nil {
@@ -128,6 +173,7 @@ func delete_client(context *gin.Context) {
 		return
 	}
 
+	// Display confirmation
 	context.JSON(http.StatusOK, gin.H{"message": "Client deleted."})
 
 }

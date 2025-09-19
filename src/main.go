@@ -16,11 +16,15 @@ func welcome_message(context *gin.Context) {
 }
 
 func main() {
+
+	// Check if secret key was configured on the environment
 	var secretKey string = os.Getenv("PFA_SECRET_KEY")
 
+	// Exit if missing
 	if secretKey == "" {
 		panic("PFA_SECRET_KEY is missing")
 	}
+
 	// Init db
 	database.InitDB()
 	// Initialise the server
@@ -30,6 +34,6 @@ func main() {
 
 	// register routes from the routes package
 	routes.RegisterRoutes(server)
-	// Run the server
+	// Run the server on 0.0.0.0 port 8000
 	server.Run("0.0.0.0:8000")
 }

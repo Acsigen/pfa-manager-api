@@ -61,6 +61,22 @@ func createTables() {
 	)
 	`
 
+	// Define the query to create the contracts table
+	createContractsTable := `
+	CREATE TABLE IF NOT EXISTS contracts (
+		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		contract_no TEXT NOT NULL,
+		client_id integer NOT NULL,
+		start_date TEXT NOT NULL,
+		end_date TEXT NOT NULL,
+		description TEXT,
+		cloud_storage_url TEXT,
+		user_id INTEGER NOT NULL,
+		FOREIGN KEY(user_id) REFERENCES users(id),
+		FOREIGN KEY(client_id) REFERENCES clients(id)
+	)
+	`
+
 	// Run the queries
 	_, err := DB.Exec(createUsersTable)
 	if err != nil {
@@ -69,5 +85,10 @@ func createTables() {
 	_, err = DB.Exec(createClientsTable)
 	if err != nil {
 		panic("Could not create clients table.")
+	}
+
+	_, err = DB.Exec(createContractsTable)
+	if err != nil {
+		panic("Could not create contracts table.")
 	}
 }

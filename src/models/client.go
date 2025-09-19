@@ -17,7 +17,7 @@ type Client struct {
 	UserID         int64
 }
 
-// Add a new client
+// Method for adding a new client
 func (c *Client) Add() error {
 	// Build the query, use ? to avoid SQL injection
 	query := `INSERT INTO clients(name, address, contact_person, country, phone_number, onrc_no, cui, user_id)
@@ -32,7 +32,7 @@ func (c *Client) Add() error {
 	// Close the statement when the function call ends
 	defer statement.Close()
 
-	// Execute the query
+	// Execute the query with the corresponding values for the `?` replacement
 	res, err := statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.UserID)
 	if err != nil {
 		return err
@@ -46,11 +46,11 @@ func (c *Client) Add() error {
 	return err
 }
 
-// Add a new client
-func (c Client) Update() error {
+// Method for updating a client
+func (c *Client) Update() error {
 	// Build the query, use ? to avoid SQL injection
 	query := `UPDATE clients
-	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?, user_id = ?
+	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?
 	WHERE id = ?`
 
 	// Prepare the query
@@ -63,17 +63,18 @@ func (c Client) Update() error {
 	defer statement.Close()
 
 	// Execute the query
-	_, err = statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.UserID, c.ID)
+	_, err = statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.ID)
 	return err
 }
 
-// Get the list of clients, return a list of clients and error type
-func Get_client_list() ([]Client, error) {
+// Function to get the list of clients, return a list of clients and error type
+// This is not required to be a method since we don't really use the struct to insert data, we just create a list of clients
+func GetClientList(userId int64) ([]Client, error) {
 	// Build the query
-	query := "SELECT * FROM clients"
+	query := "SELECT * FROM clients WHERE user_id == ?"
 
 	// Direclty execute the query
-	rows, err := database.DB.Query(query)
+	rows, err := database.DB.Query(query, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -109,12 +110,14 @@ func Get_client_list() ([]Client, error) {
 	return clients, nil
 }
 
-// Retrieve the client with a specific ID
+// Function to retrieve the client with a specific ID
+// This is not required to be a method since we don't really use the struct to insert data, we just retrieve a client from DB
 func GetClientById(id int64) (*Client, error) {
 	// We build the query this way to avoid SQL injection
 	query := "SELECT * FROM clients WHERE id == ?"
 	row := database.DB.QueryRow(query, id)
 
+	// Scan the row and map the items to client properties
 	var client Client
 	err := row.Scan(&client.ID,
 		&client.Name,
@@ -129,18 +132,23 @@ func GetClientById(id int64) (*Client, error) {
 		return nil, err
 	}
 
+	// Return the client
 	return &client, nil
 }
 
+// Method to delete a client
 func (c Client) Delete(id int64) error {
+	// Query statement
 	query := "DELETE FROM clients WHERE id == ?"
 	statement, err := database.DB.Prepare(query)
 	if err != nil {
 		return err
 	}
 
+	// Close the statement when optimal
 	defer statement.Close()
 
+	// execute the query with the id of the client
 	_, err = statement.Exec(id)
 
 	return err
