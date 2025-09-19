@@ -69,12 +69,12 @@ func (c Client) Update() error {
 
 // Function to get the list of clients, return a list of clients and error type
 // This is not required to be a method since we don't really use the struct to insert data, we just create a list of clients
-func Get_client_list() ([]Client, error) {
+func GetClientList(userId int64) ([]Client, error) {
 	// Build the query
-	query := "SELECT * FROM clients"
+	query := "SELECT * FROM clients WHERE user_id = ?"
 
 	// Direclty execute the query
-	rows, err := database.DB.Query(query)
+	rows, err := database.DB.Query(query, userId)
 	if err != nil {
 		return nil, err
 	}

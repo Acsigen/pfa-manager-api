@@ -10,14 +10,21 @@ import (
 
 // Display the client list
 func get_client_list(context *gin.Context) {
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
+
 	// Get the clients list
-	clients, err := models.Get_client_list()
+	clients, err := models.GetClientList(userId)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch clients."})
 		return
 	}
 
+	if clients == nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "No clients to show"})
+		return
+	}
 	// Return the clients if everything is ok
 	context.JSON(http.StatusOK, clients)
 }
@@ -31,11 +38,20 @@ func get_client(context *gin.Context) {
 		return
 	}
 
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
+
 	// Get the client details from DB
 	client, err := models.GetClientById(client_id)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client."})
+		return
+	}
+
+	// Only the owner can update data
+	if client.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to view this client"})
 		return
 	}
 
