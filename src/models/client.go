@@ -47,10 +47,10 @@ func (c *Client) Add() error {
 }
 
 // Method for updating a client
-func (c Client) Update() error {
+func (c *Client) Update() error {
 	// Build the query, use ? to avoid SQL injection
 	query := `UPDATE clients
-	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?, user_id = ?
+	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?
 	WHERE id = ?`
 
 	// Prepare the query
@@ -63,7 +63,7 @@ func (c Client) Update() error {
 	defer statement.Close()
 
 	// Execute the query
-	_, err = statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.UserID, c.ID)
+	_, err = statement.Exec(c.Name, c.Address, c.Contact_person, c.Country, c.Phone_number, c.ONRC_no, c.CUI, c.ID)
 	return err
 }
 
@@ -71,7 +71,7 @@ func (c Client) Update() error {
 // This is not required to be a method since we don't really use the struct to insert data, we just create a list of clients
 func GetClientList(userId int64) ([]Client, error) {
 	// Build the query
-	query := "SELECT * FROM clients WHERE user_id = ?"
+	query := "SELECT * FROM clients WHERE user_id == ?"
 
 	// Direclty execute the query
 	rows, err := database.DB.Query(query, userId)

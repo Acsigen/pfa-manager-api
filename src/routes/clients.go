@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/Acsigen/pfa-manager-api/models"
+	"github.com/Acsigen/pfa-manager-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,10 +22,12 @@ func get_client_list(context *gin.Context) {
 		return
 	}
 
+	// This won't need permissions check because we retrieve only the clients for the current user id
 	if clients == nil {
 		context.JSON(http.StatusNotFound, gin.H{"message": "No clients to show"})
 		return
 	}
+
 	// Return the clients if everything is ok
 	context.JSON(http.StatusOK, clients)
 }
@@ -50,8 +53,9 @@ func get_client(context *gin.Context) {
 	}
 
 	// Only the owner can update data
-	if client.UserID != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to view this client"})
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -107,8 +111,9 @@ func update_client(context *gin.Context) {
 	}
 
 	// Only the owner can update data
-	if client.UserID != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to update this client"})
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -122,9 +127,6 @@ func update_client(context *gin.Context) {
 
 	// Set the proper client ID
 	updatedClient.ID = client_id
-
-	// Set the proper User ID
-	updatedClient.UserID = userId
 
 	// Update the client
 	err = updatedClient.Update()
@@ -156,9 +158,10 @@ func delete_client(context *gin.Context) {
 		return
 	}
 
-	// Only the owner can delete data
-	if client.UserID != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "You are not allowed to delete this client"})
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
