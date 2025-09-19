@@ -10,7 +10,7 @@ import (
 )
 
 // Display the list
-func get_contract_list(context *gin.Context) {
+func get_wo_list(context *gin.Context) {
 	// Get the user id from the authentication middleware
 	userId := context.GetInt64("userId")
 
@@ -22,11 +22,19 @@ func get_contract_list(context *gin.Context) {
 		return
 	}
 
+	// Get the client id from path
+	contractPathId, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		return
+	}
+
 	// Get the client data
 	client, err := models.GetClientById(clientPathId)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client."})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permissions check"})
 		return
 	}
 
@@ -39,21 +47,21 @@ func get_contract_list(context *gin.Context) {
 	}
 
 	// Get the list
-	contracts, err := models.GetContractsList(userId, clientPathId)
+	woList, err := models.GetWoList(userId, clientPathId, contractPathId)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch contracts."})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch work orders."})
 		return
 	}
 
 	// Return the clients if everything is ok
-	context.JSON(http.StatusOK, contracts)
+	context.JSON(http.StatusOK, woList)
 }
 
 // Add a new contract function
-func add_contract(context *gin.Context) {
+func add_wo(context *gin.Context) {
 	// Initialise the model
-	var contract models.Contract
+	var wo models.WorkOrder
 
 	// Get the client ID from the path parameter
 	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
@@ -63,8 +71,15 @@ func add_contract(context *gin.Context) {
 		return
 	}
 
+	contract_id, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		return
+	}
+
 	// Check if the JSON body matches the model
-	err = context.ShouldBindJSON(&contract)
+	err = context.ShouldBindJSON(&wo)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
@@ -72,10 +87,12 @@ func add_contract(context *gin.Context) {
 	}
 
 	// Get the User ID from the context
-	contract.UserID = context.GetInt64("userId")
+	wo.UserID = context.GetInt64("userId")
 
 	// Set the proper client ID
-	contract.ClientID = client_id
+	wo.ClientID = client_id
+
+	wo.ContractID = contract_id
 
 	// Get the client based on ID from path parameter
 	client, err := models.GetClientById(client_id)
@@ -86,28 +103,34 @@ func add_contract(context *gin.Context) {
 	}
 
 	// Only the owner can update data
-	err = utils.CheckPermissions(contract.UserID, client.UserID)
+	err = utils.CheckPermissions(wo.UserID, client.UserID)
 
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
-	// Add the contract to DB
-	err = contract.Add()
+	// Add the wo to DB
+	err = wo.Add()
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not add contracts"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not add work order"})
 		return
 	}
 
 	// Display confirmation message and contract contents
-	context.JSON(http.StatusCreated, gin.H{"message": "Contract created", "contract": contract})
+	context.JSON(http.StatusCreated, gin.H{"message": "Work order created", "contract": wo})
 }
 
-func get_contract(context *gin.Context) {
+func get_wo(context *gin.Context) {
 	// Retrieve the path parameter
-	contract_id, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
+	wo_id, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
+		return
+	}
+
+	_, err = strconv.ParseInt(context.Param("contract_id"), 10, 64)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
 		return
@@ -123,34 +146,35 @@ func get_contract(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
 	// Get the contract details from DB
-	contract, err := models.GetContractById(contract_id)
+	wo, err := models.GetWoById(wo_id)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch contract.", "error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch wokr order.", "error": err.Error()})
 		return
 	}
 
 	// Only the owner can update data
-	err = utils.CheckPermissions(userId, contract.UserID)
+	err = utils.CheckPermissions(userId, wo.UserID)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
 	// Display the contract details with proper response code
-	context.JSON(http.StatusOK, contract)
+	context.JSON(http.StatusOK, wo)
 }
 
-func update_contract(context *gin.Context) {
+func update_wo(context *gin.Context) {
 	// Retrieve the path parameter
 	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
 		return
 	}
-	contract_id, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
+
+	wo_id, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
 		return
 	}
 
@@ -173,28 +197,28 @@ func update_contract(context *gin.Context) {
 	}
 
 	// Initialise the updated client that should match the model
-	var updatedContract models.Contract
-	err = context.ShouldBindJSON(&updatedContract)
+	var updatedWo models.WorkOrder
+	err = context.ShouldBindJSON(&updatedWo)
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse contract data."})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse work order data."})
 	}
 
 	// Set the proper contract ID
-	updatedContract.ID = contract_id
+	updatedWo.ID = wo_id
 
 	// Update the contract
-	err = updatedContract.Update()
+	err = updatedWo.Update()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update contract."})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update work order."})
 		return
 	}
 
 	// Display a confirmation
-	context.JSON(http.StatusOK, gin.H{"message": "Contract updated"})
+	context.JSON(http.StatusOK, gin.H{"message": "Work order updated"})
 }
 
-func delete_contract(context *gin.Context) {
+func delete_wo(context *gin.Context) {
 	// Retrieve the path parameter
 	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
@@ -202,9 +226,15 @@ func delete_contract(context *gin.Context) {
 		return
 	}
 
-	contract_id, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
+	_, err = strconv.ParseInt(context.Param("contract_id"), 10, 64)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		return
+	}
+
+	wo_id, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
 		return
 	}
 
@@ -226,22 +256,22 @@ func delete_contract(context *gin.Context) {
 		return
 	}
 
-	contract, err := models.GetContractById(contract_id)
+	wo, err := models.GetWoById(wo_id)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch contract for deletion."})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch work order for deletion."})
 		return
 	}
 
 	// Delete the client
-	err = contract.Delete(contract_id)
+	err = wo.Delete(wo_id)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete contract."})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete work order."})
 		return
 	}
 
 	// Display confirmation
-	context.JSON(http.StatusOK, gin.H{"message": "Contract deleted."})
+	context.JSON(http.StatusOK, gin.H{"message": "Work order deleted."})
 
 }

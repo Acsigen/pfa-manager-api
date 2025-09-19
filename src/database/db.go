@@ -4,6 +4,7 @@ package database
 // Since we do not use the driver directly, the compiler would remove it
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -77,18 +78,51 @@ func createTables() {
 	)
 	`
 
+	// Define the query to create the work orders table
+	createWoTable := `
+	CREATE TABLE IF NOT EXISTS work_orders (
+		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		client_id INTEGER NOT NULL,
+		contract_id INTEGER NOT NULL,
+		name TEXT NOT NULL,
+		final_client TEXT NOT NULL,
+		client_project_code TEXT,
+		start_date TEXT NOT NULL,
+		end_date TEXT NOT NULL,
+		price REAL NOT NULL,
+		currency TEXT NOT NULL,
+		measurement_unit TEXT NOT NULL,
+		status TEXT,
+		FOREIGN KEY(user_id) REFERENCES users(id),
+		FOREIGN KEY(client_id) REFERENCES clients(id),
+		FOREIGN KEY(contract_id) REFERENCES contracts(id),
+		UNIQUE(name)
+	)
+	`
+
 	// Run the queries
 	_, err := DB.Exec(createUsersTable)
 	if err != nil {
 		panic("Could not create users table.")
 	}
+	fmt.Println("Created users table")
+
 	_, err = DB.Exec(createClientsTable)
 	if err != nil {
 		panic("Could not create clients table.")
 	}
+	fmt.Println("Created clients table")
 
 	_, err = DB.Exec(createContractsTable)
 	if err != nil {
 		panic("Could not create contracts table.")
 	}
+	fmt.Println("Created contracts table")
+
+	_, err = DB.Exec(createWoTable)
+	if err != nil {
+		panic("Could not create work orders table.")
+	}
+	fmt.Println("Created work orders table")
 }
