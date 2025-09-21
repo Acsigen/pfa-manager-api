@@ -101,6 +101,26 @@ func createTables() {
 	)
 	`
 
+	// Define the query to create the work orders table
+	createArTable := `
+	CREATE TABLE IF NOT EXISTS activity_reports (
+		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		client_id INTEGER NOT NULL,
+		contract_id INTEGER NOT NULL,
+		wo_id INTEGER NOT NULL,
+		invoice_id INTEGER,
+		name TEXT NOT NULL,
+		date TEXT NOT NULL,
+		hours_amount REAL NOT NULL,
+		FOREIGN KEY(user_id) REFERENCES users(id),
+		FOREIGN KEY(client_id) REFERENCES clients(id),
+		FOREIGN KEY(contract_id) REFERENCES contracts(id),
+		FOREIGN KEY(wo_id) REFERENCES work_orders(id),
+		UNIQUE(name)
+	)
+	`
+
 	// Run the queries
 	_, err := DB.Exec(createUsersTable)
 	if err != nil {
@@ -125,4 +145,10 @@ func createTables() {
 		panic("Could not create work orders table.")
 	}
 	fmt.Println("Created work orders table")
+
+	_, err = DB.Exec(createArTable)
+	if err != nil {
+		panic("Could not create activity reports table.")
+	}
+	fmt.Println("Created activity reports table")
 }
