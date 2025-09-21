@@ -44,7 +44,7 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.DELETE("/clients/:id/contracts/:contract_id/wo/:wo_id", delete_wo)
 
 	// Activity Reports
-	// authenticated.POST("/clients/:id/contracts/:contract_id/wo/:wo_id", add_ar)
+	authenticated.POST("/clients/:id/contracts/:contract_id/wo/:wo_id", add_ar)
 	// authenticated.GET("/clients/:id/contracts/:contract_id/wo", get_wo_list)
 	// authenticated.PUT("/clients/:id/contracts/:contract_id/wo/:wo_id", update_wo)
 	// authenticated.GET("/clients/:id/contracts/:contract_id/wo/:wo_id", get_wo)

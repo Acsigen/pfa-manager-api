@@ -1,5 +1,7 @@
 package models
 
+import "github.com/Acsigen/pfa-manager-api/database"
+
 // Contract model, used tags to set the required items
 type ActivityReport struct {
 	ID          int64
@@ -13,34 +15,34 @@ type ActivityReport struct {
 	HoursAmount float64 `binding:"required"`
 }
 
-// // Add a new contract
-// func (w *WorkOrder) Add() error {
-// 	// Build the query, use ? to avoid SQL injection
-// 	query := `INSERT INTO work_orders(user_id, client_id, contract_id, name, final_client, client_project_code, start_date, end_date, price, currency, measurement_unit, status)
-// 	VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+// Add a new contract
+func (ar *ActivityReport) Add() error {
+	// Build the query, use ? to avoid SQL injection
+	query := `INSERT INTO activity_reports(user_id, client_id, contract_id, wo_id, invoice_id, name, date, hours_amount)
+	VALUES (?,?,?,?,?,?,?,?)`
 
-// 	// Prepare the query
-// 	statement, err := database.DB.Prepare(query)
-// 	if err != nil {
-// 		return err
-// 	}
+	// Prepare the query
+	statement, err := database.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
 
-// 	// Close the statement when the function call ends
-// 	defer statement.Close()
+	// Close the statement when the function call ends
+	defer statement.Close()
 
-// 	// Execute the query
-// 	res, err := statement.Exec(w.UserID, w.ClientID, w.ContractID, w.Name, w.FinalClient, w.ClientProjectCode, w.StartDate, w.EndDate, w.Price, w.Currency, w.MeasurementUnit, w.Status)
-// 	if err != nil {
-// 		return err
-// 	}
+	// Execute the query
+	res, err := statement.Exec(ar.UserID, ar.ClientID, ar.ContractID, ar.WorkOrderID, ar.InvoiceId, ar.Name, ar.Date, ar.HoursAmount)
+	if err != nil {
+		return err
+	}
 
-// 	// Get the last insterted ID
-// 	id, err := res.LastInsertId()
+	// Get the last insterted ID
+	id, err := res.LastInsertId()
 
-// 	// Set the ID of the client object so we can return it with the object in another function
-// 	w.ID = id
-// 	return err
-// }
+	// Set the ID of the client object so we can return it with the object in another function
+	ar.ID = id
+	return err
+}
 
 // // Method for updating a contract
 // func (w *WorkOrder) Update() error {
