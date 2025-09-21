@@ -44,26 +44,27 @@ func (ar *ActivityReport) Add() error {
 	return err
 }
 
-// // Method for updating a contract
-// func (w *WorkOrder) Update() error {
-// 	// Build the query, use ? to avoid SQL injection
-// 	query := `UPDATE work_orders
-// 	SET name = ?, final_client = ?, client_project_code = ?, start_date = ?, end_date = ?, price = ?, currency = ?, measurement_unit = ?, status = ?
-// 	WHERE id == ?`
+// Method for updating a contract
+func (ar *ActivityReport) Update() error {
+	// Build the query, use ? to avoid SQL injection
+	// TODO: Change the invoice ID when invoice section is implemented
+	query := `UPDATE activity_reports
+	SET invoice_id = 0, name = ?, date = ?, hours_amount = ?
+	WHERE id == ?`
 
-// 	// Prepare the query
-// 	statement, err := database.DB.Prepare(query)
-// 	if err != nil {
-// 		return err
-// 	}
+	// Prepare the query
+	statement, err := database.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
 
-// 	// Close the statement when the function call ends
-// 	defer statement.Close()
+	// Close the statement when the function call ends
+	defer statement.Close()
 
-// 	// Execute the query
-// 	_, err = statement.Exec(w.Name, w.FinalClient, w.ClientProjectCode, w.StartDate, w.EndDate, w.Price, w.Currency, w.MeasurementUnit, w.Status, w.ID)
-// 	return err
-// }
+	// Execute the query
+	_, err = statement.Exec(ar.Name, ar.Date, ar.HoursAmount, ar.ID)
+	return err
+}
 
 // Function to get the list of contracts, return a list of contracts and error type
 // This is not required to be a method since we don't really use the struct to insert data, we just create a list of contracts
@@ -135,20 +136,20 @@ func GetArById(id int64) (*ActivityReport, error) {
 	return &ar, nil
 }
 
-// // Method to delete a contract
-// func (w WorkOrder) Delete(id int64) error {
-// 	// Query statement
-// 	query := "DELETE FROM work_orders WHERE id == ?"
-// 	statement, err := database.DB.Prepare(query)
-// 	if err != nil {
-// 		return err
-// 	}
+// Method to delete a contract
+func (ar ActivityReport) Delete(id int64) error {
+	// Query statement
+	query := "DELETE FROM activity_report WHERE id == ?"
+	statement, err := database.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
 
-// 	// Close the statement when optimal
-// 	defer statement.Close()
+	// Close the statement when optimal
+	defer statement.Close()
 
-// 	// execute the query with the id of the contract
-// 	_, err = statement.Exec(id)
+	// execute the query with the id of the contract
+	_, err = statement.Exec(id)
 
-// 	return err
-// }
+	return err
+}

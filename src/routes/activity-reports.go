@@ -190,114 +190,126 @@ func get_ar(context *gin.Context) {
 	context.JSON(http.StatusOK, ar)
 }
 
-// func update_wo(context *gin.Context) {
-// 	// Retrieve the path parameter
-// 	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
-// 		return
-// 	}
+func update_ar(context *gin.Context) {
+	// Retrieve the path parameter
+	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
+		return
+	}
 
-// 	wo_id, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
-// 		return
-// 	}
+	ar_id, err := strconv.ParseInt(context.Param("ar_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid activity report ID"})
+		return
+	}
 
-// 	// Get the user id from the authentication middleware
-// 	userId := context.GetInt64("userId")
+	_, err = strconv.ParseInt(context.Param("wo_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
+		return
+	}
 
-// 	// Get the client based on ID from path parameter
-// 	client, err := models.GetClientById(client_id)
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check"})
-// 		return
-// 	}
+	// Get the client based on ID from path parameter
+	client, err := models.GetClientById(client_id)
 
-// 	// Only the owner can update data
-// 	err = utils.CheckPermissions(userId, client.UserID)
-// 	if err != nil {
-// 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check"})
+		return
+	}
 
-// 	// Initialise the updated client that should match the model
-// 	var updatedWo models.WorkOrder
-// 	err = context.ShouldBindJSON(&updatedWo)
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
 
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse work order data."})
-// 	}
+	// Initialise the updated client that should match the model
+	var updatedAr models.ActivityReport
+	err = context.ShouldBindJSON(&updatedAr)
 
-// 	// Set the proper contract ID
-// 	updatedWo.ID = wo_id
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse activity report data."})
+	}
 
-// 	// Update the contract
-// 	err = updatedWo.Update()
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update work order."})
-// 		return
-// 	}
+	// Set the proper contract ID
+	updatedAr.ID = ar_id
 
-// 	// Display a confirmation
-// 	context.JSON(http.StatusOK, gin.H{"message": "Work order updated"})
-// }
+	// Update the contract
+	err = updatedAr.Update()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update activity report."})
+		return
+	}
 
-// func delete_wo(context *gin.Context) {
-// 	// Retrieve the path parameter
-// 	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
-// 		return
-// 	}
+	// Display a confirmation
+	context.JSON(http.StatusOK, gin.H{"message": "Activity report updated updated"})
+}
 
-// 	_, err = strconv.ParseInt(context.Param("contract_id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
-// 		return
-// 	}
+func delete_ar(context *gin.Context) {
+	// Retrieve the path parameter
+	client_id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
+		return
+	}
 
-// 	wo_id, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
-// 		return
-// 	}
+	_, err = strconv.ParseInt(context.Param("contract_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		return
+	}
 
-// 	// Get the user id from the authentication middleware
-// 	userId := context.GetInt64("userId")
+	_, err = strconv.ParseInt(context.Param("wo_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
+		return
+	}
 
-// 	// Get the client based on ID from path parameter
-// 	client, err := models.GetClientById(client_id)
+	ar_id, err := strconv.ParseInt(context.Param("ar_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid activity report ID"})
+		return
+	}
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check."})
-// 		return
-// 	}
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
 
-// 	// Only the owner can update data
-// 	err = utils.CheckPermissions(userId, client.UserID)
-// 	if err != nil {
-// 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-// 		return
-// 	}
+	// Get the client based on ID from path parameter
+	client, err := models.GetClientById(client_id)
 
-// 	wo, err := models.GetWoById(wo_id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permission check."})
+		return
+	}
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch work order for deletion."})
-// 		return
-// 	}
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, client.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
 
-// 	// Delete the client
-// 	err = wo.Delete(wo_id)
+	ar, err := models.GetArById(ar_id)
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete work order."})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch activity repory for deletion."})
+		return
+	}
 
-// 	// Display confirmation
-// 	context.JSON(http.StatusOK, gin.H{"message": "Work order deleted."})
+	// Delete the client
+	err = ar.Delete(ar_id)
 
-// }
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete activity report."})
+		return
+	}
+
+	// Display confirmation
+	context.JSON(http.StatusOK, gin.H{"message": "Activity report deleted."})
+
+}

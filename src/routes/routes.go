@@ -46,9 +46,9 @@ func RegisterRoutes(server *gin.Engine) {
 	// Activity Reports
 	authenticated.POST("/clients/:id/contracts/:contract_id/wo/:wo_id", add_ar)
 	authenticated.GET("/clients/:id/contracts/:contract_id/wo/:wo_id/ar", get_ar_list)
-	// authenticated.PUT("/clients/:id/contracts/:contract_id/wo/:wo_id", update_wo)
+	authenticated.PUT("/clients/:id/contracts/:contract_id/wo/:wo_id/ar/:ar_id", update_ar)
 	authenticated.GET("/clients/:id/contracts/:contract_id/wo/:wo_id/ar/:ar_id", get_ar)
-	// authenticated.DELETE("/clients/:id/contracts/:contract_id/wo/:wo_id", delete_wo)
+	authenticated.DELETE("/clients/:id/contracts/:contract_id/wo/:wo_id/ar/:ar_id", delete_ar)
 
 	// Register a new user
 	server.POST("/signup", signup)
