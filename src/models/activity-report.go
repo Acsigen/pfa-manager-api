@@ -109,35 +109,31 @@ func GetArList(userId int64, clientId int64, contractId int64, woId int64) ([]Ac
 	return arList, nil
 }
 
-// // Function to retrieve the client with a specific ID
-// // This is not required to be a method since we don't really use the struct to insert data, we just retrieve a client from DB
-// func GetWoById(id int64) (*WorkOrder, error) {
-// 	// We build the query this way to avoid SQL injection
-// 	query := "SELECT * FROM work_orders WHERE id == ?"
-// 	row := database.DB.QueryRow(query, id)
+// Function to retrieve the client with a specific ID
+// This is not required to be a method since we don't really use the struct to insert data, we just retrieve a client from DB
+func GetArById(id int64) (*ActivityReport, error) {
+	// We build the query this way to avoid SQL injection
+	query := "SELECT * FROM activity_reports WHERE id == ?"
+	row := database.DB.QueryRow(query, id)
 
-// 	// Scan the row and map the items to client properties
-// 	var wo WorkOrder
-// 	err := row.Scan(&wo.ID,
-// 		&wo.UserID,
-// 		&wo.ClientID,
-// 		&wo.ContractID,
-// 		&wo.Name,
-// 		&wo.FinalClient,
-// 		&wo.ClientProjectCode,
-// 		&wo.StartDate,
-// 		&wo.EndDate,
-// 		&wo.Price,
-// 		&wo.Currency,
-// 		&wo.MeasurementUnit,
-// 		&wo.Status)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// Scan the row and map the items to client properties
+	var ar ActivityReport
+	err := row.Scan(&ar.ID,
+		&ar.UserID,
+		&ar.ClientID,
+		&ar.ContractID,
+		&ar.WorkOrderID,
+		&ar.InvoiceId,
+		&ar.Name,
+		&ar.Date,
+		&ar.HoursAmount)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Return the client
-// 	return &wo, nil
-// }
+	// Return the client
+	return &ar, nil
+}
 
 // // Method to delete a contract
 // func (w WorkOrder) Delete(id int64) error {

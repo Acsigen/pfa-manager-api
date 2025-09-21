@@ -142,47 +142,53 @@ func add_ar(context *gin.Context) {
 	context.JSON(http.StatusCreated, gin.H{"message": "Work order created", "activity_report": ar})
 }
 
-// func get_wo(context *gin.Context) {
-// 	// Retrieve the path parameter
-// 	wo_id, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
-// 		return
-// 	}
+func get_ar(context *gin.Context) {
+	// Retrieve the path parameter
+	_, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
+		return
+	}
 
-// 	_, err = strconv.ParseInt(context.Param("contract_id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
-// 		return
-// 	}
+	ar_id, err := strconv.ParseInt(context.Param("ar_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid activity report ID"})
+		return
+	}
 
-// 	_, err = strconv.ParseInt(context.Param("id"), 10, 64)
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
-// 		return
-// 	}
+	_, err = strconv.ParseInt(context.Param("contract_id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		return
+	}
 
-// 	// Get the user id from the authentication middleware
-// 	userId := context.GetInt64("userId")
+	_, err = strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
+		return
+	}
 
-// 	// Get the contract details from DB
-// 	wo, err := models.GetWoById(wo_id)
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch wokr order.", "error": err.Error()})
-// 		return
-// 	}
+	// Get the contract details from DB
+	ar, err := models.GetArById(ar_id)
 
-// 	// Only the owner can update data
-// 	err = utils.CheckPermissions(userId, wo.UserID)
-// 	if err != nil {
-// 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch activity report.", "error": err.Error()})
+		return
+	}
 
-// 	// Display the contract details with proper response code
-// 	context.JSON(http.StatusOK, wo)
-// }
+	// Only the owner can update data
+	err = utils.CheckPermissions(userId, ar.UserID)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Display the contract details with proper response code
+	context.JSON(http.StatusOK, ar)
+}
 
 // func update_wo(context *gin.Context) {
 // 	// Retrieve the path parameter
