@@ -65,53 +65,49 @@ func (ar *ActivityReport) Add() error {
 // 	return err
 // }
 
-// // Function to get the list of contracts, return a list of contracts and error type
-// // This is not required to be a method since we don't really use the struct to insert data, we just create a list of contracts
-// func GetWoList(userId int64, clientId int64, contractId int64) ([]WorkOrder, error) {
-// 	// Build the query
-// 	query := "SELECT * FROM work_orders where user_id == ? AND client_id == ? AND contract_id == ?"
+// Function to get the list of contracts, return a list of contracts and error type
+// This is not required to be a method since we don't really use the struct to insert data, we just create a list of contracts
+func GetArList(userId int64, clientId int64, contractId int64, woId int64) ([]ActivityReport, error) {
+	// Build the query
+	query := "SELECT * FROM activity_reports where user_id == ? AND client_id == ? AND contract_id == ? AND wo_id == ?"
 
-// 	// Direclty execute the query
-// 	rows, err := database.DB.Query(query, userId, clientId, contractId)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// Direclty execute the query
+	rows, err := database.DB.Query(query, userId, clientId, contractId, woId)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Close the database connection when function call is done
-// 	defer rows.Close()
+	// Close the database connection when function call is done
+	defer rows.Close()
 
-// 	// Create the data structure for the return
-// 	var woList []WorkOrder
+	// Create the data structure for the return
+	var arList []ActivityReport
 
-// 	// Iterate over each row
-// 	for rows.Next() {
-// 		// Scan each row and map the items to client properties
-// 		// The order of the arguments for the Scan function must be the same as the DB table not the model
-// 		var wo WorkOrder
-// 		err := rows.Scan(&wo.ID,
-// 			&wo.UserID,
-// 			&wo.ClientID,
-// 			&wo.ContractID,
-// 			&wo.Name,
-// 			&wo.FinalClient,
-// 			&wo.ClientProjectCode,
-// 			&wo.StartDate,
-// 			&wo.EndDate,
-// 			&wo.Price,
-// 			&wo.Currency,
-// 			&wo.MeasurementUnit,
-// 			&wo.Status)
-// 		if err != nil {
-// 			return nil, err
-// 		}
+	// Iterate over each row
+	for rows.Next() {
+		// Scan each row and map the items to client properties
+		// The order of the arguments for the Scan function must be the same as the DB table not the model
+		var ar ActivityReport
+		err := rows.Scan(&ar.ID,
+			&ar.UserID,
+			&ar.ClientID,
+			&ar.ContractID,
+			&ar.WorkOrderID,
+			&ar.InvoiceId,
+			&ar.Name,
+			&ar.Date,
+			&ar.HoursAmount)
+		if err != nil {
+			return nil, err
+		}
 
-// 		// append each client to the list of clients
-// 		woList = append(woList, wo)
-// 	}
+		// append each client to the list of clients
+		arList = append(arList, ar)
+	}
 
-// 	// Return the clients and no error
-// 	return woList, nil
-// }
+	// Return the clients and no error
+	return arList, nil
+}
 
 // // Function to retrieve the client with a specific ID
 // // This is not required to be a method since we don't really use the struct to insert data, we just retrieve a client from DB

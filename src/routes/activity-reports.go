@@ -9,54 +9,62 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// // Display the list
-// func get_wo_list(context *gin.Context) {
-// 	// Get the user id from the authentication middleware
-// 	userId := context.GetInt64("userId")
+// Display the list
+func get_ar_list(context *gin.Context) {
+	// Get the user id from the authentication middleware
+	userId := context.GetInt64("userId")
 
-// 	// Get the client id from path
-// 	clientPathId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	// Get the client id from path
+	clientPathId, err := strconv.ParseInt(context.Param("id"), 10, 64)
 
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid client ID"})
+		return
+	}
 
-// 	// Get the client id from path
-// 	contractPathId, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
+	// Get the client id from path
+	contractPathId, err := strconv.ParseInt(context.Param("contract_id"), 10, 64)
 
-// 	if err != nil {
-// 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid contract ID"})
+		return
+	}
 
-// 	// Get the client data
-// 	client, err := models.GetClientById(clientPathId)
+	// Get the client id from path
+	woPathId, err := strconv.ParseInt(context.Param("wo_id"), 10, 64)
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permissions check"})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid work order ID"})
+		return
+	}
 
-// 	// check permissions
-// 	err = utils.CheckPermissions(userId, client.ID)
+	// Get the client data
+	client, err := models.GetClientById(clientPathId)
 
-// 	if err != nil {
-// 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch client for permissions check"})
+		return
+	}
 
-// 	// Get the list
-// 	woList, err := models.GetWoList(userId, clientPathId, contractPathId)
+	// check permissions
+	err = utils.CheckPermissions(userId, client.ID)
 
-// 	if err != nil {
-// 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch work orders."})
-// 		return
-// 	}
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
 
-// 	// Return the clients if everything is ok
-// 	context.JSON(http.StatusOK, woList)
-// }
+	// Get the list
+	arList, err := models.GetArList(userId, clientPathId, contractPathId, woPathId)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch activity reports."})
+		return
+	}
+
+	// Return the clients if everything is ok
+	context.JSON(http.StatusOK, arList)
+}
 
 // Add a new contract function
 func add_ar(context *gin.Context) {
