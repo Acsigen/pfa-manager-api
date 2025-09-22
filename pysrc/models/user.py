@@ -12,7 +12,7 @@ class User(BaseModel):
     email_address: str
     password: str
 
-    def create_user(self):
+    def add(self):
         db = DB
         query = "INSERT INTO users(first_name, last_name, phone_number, email_address, password) VALUES (?, ?, ?, ?, ?)"
         self.password = hash_password(self.password)
