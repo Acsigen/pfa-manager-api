@@ -20,7 +20,7 @@ func RegisterRoutes(server *gin.Engine) {
 	// server.DELETE("/clients/:id", middlewares.Authenticate, delete_client)
 
 	// Group clients requests and protect all of them with the authentication method
-	authenticated := server.Group("/")
+	authenticated := server.Group("/api/v1")
 	authenticated.Use(middlewares.Authenticate)
 	// Clients
 	authenticated.GET("/clients", get_client_list)
@@ -49,6 +49,19 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.PUT("/clients/:id/contracts/:contract_id/wo/:wo_id/ar/:ar_id", update_ar)
 	authenticated.GET("/clients/:id/contracts/:contract_id/wo/:wo_id/ar/:ar_id", get_ar)
 	authenticated.DELETE("/clients/:id/contracts/:contract_id/wo/:wo_id/ar/:ar_id", delete_ar)
+
+	// Invoices
+	authenticated.POST("/client/:id/invoices", add_invoice)
+	// TODO: authenticated.GET("/client/:id/invoices", get_client_invoices)
+	authenticated.GET("/invoices", get_invoice_list)
+	// authenticated.PUT("/invoices/:id", update_invoice)
+	// authenticated.GET("/invoices/:id", get_invoice)
+	// authenticated.DELETE("/invoices/:id/", delete_invoice)
+
+	// Invoice Items
+	// TODO: Add items to invoice
+	// TODO: List invoice items
+	// TODO: Delete item from invoice
 
 	// Register a new user
 	server.POST("/signup", signup)
