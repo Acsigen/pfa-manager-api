@@ -22,6 +22,6 @@ class User(BaseModel):
             self.id = db.cursor.lastrowid
             db.con.commit()
             self.password = "REDACTED"
-            raise HTTPException(201,self.__dict__)
+            return self
         except sqlite3.IntegrityError as e:
             raise HTTPException(500,e.args[0])

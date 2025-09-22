@@ -22,37 +22,35 @@ async def root():
 
 @app.post("/signup")
 async def signup_handler(user: User):
-    user.add()
+    added_user = user.add()
+    if type(added_user) == User:
+        return added_user
 
 @app.post("/api/v1/clients")
 async def add_client_handler(client: Client):
-    client.add()
+    added_client = client.add()
+    if type(added_client) == Client:
+        return added_client
 
 @app.put("/api/v1/clients/{client_id}")
 async def update_client_handler(client_id: int, client: Client):
     updated_client = client.update(client_id)
     if type(updated_client) == Client:
         return updated_client
-    else:
-        raise HTTPException(500,updated_client)
 
 @app.get("/api/v1/clients/{client_id}")
 async def show_client_handler(client_id: int):
     client = show_client(client_id)
     if type(client) == Client:
         return client
-    else:
-        raise HTTPException(500,client)
-
 
 @app.get("/api/v1/clients")
 async def list_clients_handler():
     client_list = list_clients()
     if type(client_list) == list:
         return client_list
-    else:
-        raise HTTPException(500,client_list)
 
 @app.delete("/api/v1/clients/{client_id}")
 async def delete_client_handler(client_id: int):
-    delete_client(client_id=client_id)
+    if delete_client(client_id=client_id) == True:
+        return "Client deleted"

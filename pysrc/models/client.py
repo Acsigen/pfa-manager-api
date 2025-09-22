@@ -23,7 +23,7 @@ class Client(BaseModel):
             db.cursor.execute(query, data)
             self.id = db.cursor.lastrowid
             db.con.commit()
-            raise HTTPException(201,self.__dict__)
+            return self
         except sqlite3.IntegrityError as e:
             raise HTTPException(500,e.args[0])
 
@@ -81,7 +81,7 @@ def list_clients():
             client_list.append(client)
         return client_list
     except sqlite3.OperationalError as e:
-        return e.args[0]
+        raise HTTPException(500,e.args[0])
 
 def delete_client(client_id: int):
     db = DB
@@ -90,7 +90,7 @@ def delete_client(client_id: int):
     try: 
         db.cursor.execute(query, data)
         db.con.commit()
-        raise HTTPException(201,"Client deleted")
+        return True
     except sqlite3.IntegrityError as e:
         raise HTTPException(500,e.args[0])
 
