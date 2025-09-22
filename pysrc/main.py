@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from database.db import init_db
 from models.user import User
 from dotenv import load_dotenv
