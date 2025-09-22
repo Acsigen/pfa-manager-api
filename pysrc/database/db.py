@@ -41,6 +41,21 @@ def create_tables(db: sqlite3.Cursor):
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """
+        },
+        {
+            "table_name": "contracts",
+            "query":"""
+            CREATE TABLE IF NOT EXISTS contracts (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                contract_no TEXT NOT NULL,
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL,
+                description TEXT,
+                cloud_storage_url TEXT,
+                client_id integer NOT NULL,
+                FOREIGN KEY(client_id) REFERENCES clients(id)
+            )
+            """
         }
     ]
     
