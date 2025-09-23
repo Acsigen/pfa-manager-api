@@ -1,19 +1,20 @@
-FROM golang:1.25 AS builder
+FROM python:3.13-slim
 
-WORKDIR /app-builder
-
-COPY ./src /app-builder
-
-RUN go build -v
-
-FROM golang:1.25 AS pfa-manager-api
+RUN useradd -m -s /bin/bash pfa.manager && mkdir /app
 
 WORKDIR /app
 
-COPY --from=builder /app-builder/pfa-manager-api /app/pfa-manager-api
-
 VOLUME /app/data
+
+COPY ./src /app
+
+RUN chown -R pfa.manager: /app
+
+USER pfa.manager
+
+RUN pip install -r requirements.txt
 
 EXPOSE 8000
 
-ENTRYPOINT ["/app/pfa-manager-api"]
+ENTRYPOINT ["/home/pfa.manager/.local/bin/fastapi"]
+CMD ["dev", "main.py"]

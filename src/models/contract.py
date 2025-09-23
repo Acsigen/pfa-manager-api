@@ -1,0 +1,92 @@
+from pydantic import BaseModel
+from fastapi import HTTPException
+import sqlite3 # For error handling
+from ..database import db
+
+class Contract(BaseModel):
+    id: int | None = None
+    contract_no: str
+    start_date: str
+    end_date: str
+    description: str | None = None
+    cloud_storage_url: str | None = None
+    client_id: int | None = 0
+
+
+    def add(self, client_id):
+        query = "INSERT INTO contracts(contract_no, start_date, end_date, description, cloud_storage_url, client_id) VALUES (?,?,?,?,?,?)"
+        self.client_id = client_id
+        data: tuple = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.client_id)
+        try: 
+            res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            self.id = res.lastrowid
+            return self
+        except sqlite3.IntegrityError as e:
+            raise HTTPException(500,e.args[0])
+
+    def update(self, contract_id, client_id):
+        query = "UPDATE contracts SET contract_no = ?, start_date = ?, end_date = ?, description = ?, cloud_storage_url = ? WHERE id = ? AND client_id == ?"
+        self.id = contract_id
+        self.client_id = client_id
+        data = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.id, self.client_id)
+        try: 
+            _: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            updated_contract: Contract = show_contract(contract_id=self.id,client_id=self.client_id)
+            return updated_contract
+        except sqlite3.Error as e:
+            raise HTTPException(500,e.args[0])
+
+def show_contract(contract_id: int, client_id: int):
+    query = "SELECT * FROM contracts WHERE id == ? AND client_id == ?"
+    data = (contract_id, client_id)
+    try: 
+        res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+        row: tuple = res.fetchone()
+        if row:
+            print(row)
+            contract: Contract = Contract(id=int(row[0]),
+                            contract_no=row[1],
+                            start_date=row[2],
+                            end_date=row[3],
+                            description=row[4],
+                            cloud_storage_url=row[5],
+                            client_id=row[6]
+            )
+            return contract
+        else:
+            raise HTTPException(404, "No such contract")
+    except sqlite3.Error as e:
+        raise HTTPException(500,e.args[0])
+
+def list_contracts(client_id: int):
+    contract_list: list[Contract] = []
+    query = "SELECT * FROM contracts WHERE client_id == ?"
+    data: tuple = (client_id,)
+    try: 
+        res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+        rows: list[tuple] = res.fetchall()
+        for row in rows:
+            contract: Contract = Contract(id=int(row[0]),
+                            contract_no=row[1],
+                            start_date=row[2],
+                            end_date=row[3],
+                            description=row[4],
+                            cloud_storage_url=row[5],
+                            client_id=row[6])
+            contract_list.append(contract)
+        return contract_list
+    except sqlite3.OperationalError as e:
+        raise HTTPException(500,e.args[0])
+
+def delete_contract(contract_id: int, client_id: int):
+    query = "DELETE FROM contracts WHERE id == ? AND client_id == ?"
+    data = (contract_id,client_id)
+    try: 
+        checkout_contract = show_contract(contract_id=contract_id, client_id=client_id)
+        if type(checkout_contract) is Contract:
+            _: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            return True
+        else:
+            raise HTTPException(404, "No such contract")
+    except sqlite3.IntegrityError as e:
+        raise HTTPException(500,e.args[0])
