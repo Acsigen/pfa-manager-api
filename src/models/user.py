@@ -11,11 +11,12 @@ class User(BaseModel):
     phone_number: str | None = None
     email_address: str
     password: str
+    role: str
 
     def add(self):
-        query = "INSERT INTO users(first_name, last_name, phone_number, email_address, password) VALUES (?, ?, ?, ?, ?)"
+        query = "INSERT INTO users(first_name, last_name, phone_number, email_address, password, role) VALUES (?, ?, ?, ?, ?,?)"
         self.password = hash_password(password=self.password)
-        data = (self.first_name, self.last_name, self.phone_number, self.email_address, self.password)
+        data = (self.first_name, self.last_name, self.phone_number, self.email_address, self.password, self.role)
         try:
             res: sqlite3.Cursor = db.execute_query(query=query, params=data)
             self.id = res.lastrowid

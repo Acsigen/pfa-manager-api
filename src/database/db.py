@@ -59,6 +59,7 @@ def create_tables(cursor):
                 phone_number TEXT NOT NULL,
                 email_address TEXT NOT NULL,
                 password TEXT NOT NULL,
+                role text NOT NULL,
                 UNIQUE(email_address, phone_number)
             )
             """
