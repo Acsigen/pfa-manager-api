@@ -14,5 +14,5 @@ EXPOSE 8000
 
 VOLUME /app/data
 
-ENTRYPOINT ["fastapi"]
+ENTRYPOINT ["/home/pfa.manager/.local/bin/fastapi"]
 CMD ["dev", "main.py"]
