@@ -95,6 +95,40 @@ def create_tables(cursor):
                 FOREIGN KEY(client_id) REFERENCES clients(id)
             )
             """
+        },
+        {
+            "table_name": "work_orders",
+            "query": """
+            CREATE TABLE IF NOT EXISTS work_orders (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                contract_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                final_client TEXT NOT NULL,
+                client_project_code TEXT,
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL,
+                price REAL NOT NULL,
+                currency TEXT NOT NULL,
+                measurement_unit TEXT NOT NULL,
+                status TEXT,
+                FOREIGN KEY(contract_id) REFERENCES contracts(id),
+                UNIQUE(name)
+            )
+            """
+        },
+        {
+            "table_name": "activity_reports",
+            "query": """
+            CREATE TABLE IF NOT EXISTS activity_reports (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                wo_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                date TEXT NOT NULL,
+                hours_amount REAL NOT NULL,
+                FOREIGN KEY(wo_id) REFERENCES work_orders(id),
+                UNIQUE(name)
+            )
+            """
         }
     ]
 
