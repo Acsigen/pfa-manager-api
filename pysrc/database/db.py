@@ -1,18 +1,57 @@
 import sqlite3
+import os
 
-class DB():
+DB_FILE = "./data/tutorial.db"
+
+def init_db():
+    """
+    Initializes the database by creating tables.
+    This function should be called once, e.g., on application startup.
+    """
+    # Create the 'data' directory if it doesn't exist
+    os.makedirs(name=os.path.dirname(p=DB_FILE), exist_ok=True)
+    
     try:
-        con = sqlite3.connect("./data/tutorial.db")
-        cursor = con.cursor()
+        with sqlite3.connect(database=DB_FILE) as con:
+            cursor: sqlite3.Cursor = con.cursor()
+            create_tables(cursor=cursor)
+            print("Database initialized successfully.")
     except sqlite3.Error as e:
-        print(e)
-        exit(1)
+        print(f"Error initializing the database: {e}")
+        raise
 
-def create_tables(db: sqlite3.Cursor):
+def get_db_connection():
+    """
+    Returns a new database connection object.
+    It's the caller's responsibility to manage this connection.
+    """
+    return sqlite3.connect(database=DB_FILE)
+
+def execute_query(query, params=None):
+    """
+    A helper function to execute a single query within a transaction.
+    It automatically handles the connection and cursor.
+    """
+    try:
+        with sqlite3.connect(database=DB_FILE) as con:
+            cursor: sqlite3.Cursor = con.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            # The 'with' statement handles the commit
+            return cursor
+    except sqlite3.Error as e:
+        print(f"Database error during query execution: {e.args[0]}")
+        # The 'with' statement handles the rollback
+        raise
+
+def create_tables(cursor):
+    # This function remains the same as in the previous example
     tables = [
         {
             "table_name": "users",
-            "query":"""
+            "query": """
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 first_name TEXT NOT NULL,
@@ -26,7 +65,7 @@ def create_tables(db: sqlite3.Cursor):
         },
         {
             "table_name": "clients",
-            "query":"""
+            "query": """
             CREATE TABLE IF NOT EXISTS clients (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -37,14 +76,14 @@ def create_tables(db: sqlite3.Cursor):
                 onrc_no TEXT NOT NULL,
                 cui TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
-                UNIQUE(onrc_no,cui),
+                UNIQUE(onrc_no, cui),
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """
         },
         {
             "table_name": "contracts",
-            "query":"""
+            "query": """
             CREATE TABLE IF NOT EXISTS contracts (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 contract_no TEXT NOT NULL,
@@ -58,15 +97,11 @@ def create_tables(db: sqlite3.Cursor):
             """
         }
     ]
-    
+
     for table in tables:
         try:
-            db.execute(table['query'])
+            cursor.execute(table['query'])
             print(f"Created {table['table_name']} table")
-        except Exception as e:
-            print(e)
-            exit(1)
-
-def init_db():
-    db = DB
-    create_tables(db.cursor)
+        except sqlite3.Error as e:
+            print(f"Error creating {table['table_name']} table: {e}")
+            raise

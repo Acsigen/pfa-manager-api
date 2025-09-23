@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from fastapi import HTTPException
 import sqlite3 # For error handling
-from database.db import DB
+from ..database import db
 
 class Contract(BaseModel):
     id: int | None = None
@@ -10,65 +10,46 @@ class Contract(BaseModel):
     end_date: str
     description: str | None = None
     cloud_storage_url: str | None = None
-    client_id: int
+    client_id: int | None = 0
 
 
-#     def add(self):
-#         db = DB
-#         query = "INSERT INTO clients(name, address, contact_person, country, phone_number, onrc_no, cui, user_id) VALUES (?,?,?,?,?,?,?,?)"
-#         self.user_id = 0
-#         data = (self.name, self.address, self.contact_person, self.country, self.phone_number, self.onrc_no, self.cui, self.user_id)
-#         try: 
-#             db.cursor.execute(query, data)
-#             self.id = db.cursor.lastrowid
-#             db.con.commit()
-#             return self
-#         except sqlite3.IntegrityError as e:
-#             raise HTTPException(500,e.args[0])
+    def add(self, client_id):
+        query = "INSERT INTO contracts(contract_no, start_date, end_date, description, cloud_storage_url, client_id) VALUES (?,?,?,?,?,?)"
+        self.client_id = client_id
+        data: tuple = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.client_id)
+        try: 
+            res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            self.id = res.lastrowid
+            return self
+        except sqlite3.IntegrityError as e:
+            raise HTTPException(500,e.args[0])
 
-#     def update(self, client_id):
-#         db = DB
-#         query = "UPDATE clients	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?	WHERE id = ?"
-#         self.user_id = 0
-#         self.id = client_id
-#         data = (self.name, self.address, self.contact_person, self.country, self.phone_number, self.onrc_no, self.cui, self.id)
-#         try: 
-#             db.cursor.execute(query, data)
-#             db.con.commit()
-#             return self
-#         except sqlite3.IntegrityError as e:
-#             raise HTTPException(500,e.args[0])
-    
-# def show_client(client_id: int):
-#     db = DB
-#     query = "SELECT * FROM clients WHERE id == ?"
-#     data = (client_id,)
-#     try: 
-#         db.cursor.execute(query, data)
-#         res = db.cursor.fetchone()
-#         client = Client(id=int(res[0]),
-#                         name=res[1],
-#                         address=res[2],
-#                         contact_person=res[3],
-#                         country=res[4],
-#                         phone_number=res[5],
-#                         onrc_no=res[6],
-#                         cui=res[7],
-#                         user_id=int(res[8])
-#         )
-#         return client
-#     except sqlite3.IntegrityError as e:
-#         raise HTTPException(500,e.args[0])
+def show_contract(contract_id: int):
+    query = "SELECT * FROM contracts WHERE id == ?"
+    data = (contract_id,)
+    try: 
+        res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+        row: tuple = res.fetchone()
+        contract: Contract = Contract(id=int(row[0]),
+                        contract_no=row[1],
+                        start_date=row[2],
+                        end_date=row[3],
+                        description=row[4],
+                        cloud_storage_url=row[5],
+                        client_id=row[6]
+        )
+        return contract
+    except sqlite3.IntegrityError as e:
+        raise HTTPException(500,e.args[0])
 
 # def list_clients():
-#     db = DB
-#     client_list = []
+#     client_list: list[Client] = []
 #     query = "SELECT * FROM clients"
 #     try: 
-#         db.cursor.execute(query)
-#         res = db.cursor.fetchall()
-#         for row in res:
-#             client = Client(id=int(row[0]),
+#         res: sqlite3.Cursor = db.execute_query(query=query)
+#         rows: list[tuple] = res.fetchall()
+#         for row in rows:
+#             client: Client = Client(id=int(row[0]),
 #                             name=row[1],
 #                             address=row[2],
 #                             contact_person=row[3],
@@ -83,13 +64,10 @@ class Contract(BaseModel):
 #         raise HTTPException(500,e.args[0])
 
 # def delete_client(client_id: int):
-#     db = DB
 #     query = "DELETE FROM clients WHERE id == ?"
 #     data = (client_id,)
 #     try: 
-#         db.cursor.execute(query, data)
-#         db.con.commit()
+#         _: sqlite3.Cursor = db.execute_query(query=query, params=data)
 #         return True
 #     except sqlite3.IntegrityError as e:
 #         raise HTTPException(500,e.args[0])
-

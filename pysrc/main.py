@@ -1,29 +1,30 @@
 from fastapi import FastAPI
-from database.db import init_db
-from models.user import User
+from .database import db
+from .models.user import User
 from dotenv import load_dotenv
-from routers import clients
+from .routers import clients, contracts
 import os
 
-load_dotenv
+load_dotenv()
 
-if not os.getenv("PFA_SECRET_KEY"):
+if not os.getenv(key="PFA_SECRET_KEY"):
     print("Missing PFA_SECRET_KEY variable")
-    exit(1)
+    exit(code=1)
 
-init_db()
+db.init_db()
 
-app = FastAPI()
+app: FastAPI = FastAPI()
 
-app.include_router(clients.router)
+app.include_router(router=clients.router)
+app.include_router(router=contracts.router)
 
-@app.get("/")
+@app.get(path="/")
 async def root():
     return {"message": "Welcome to PFA Manager API"}
 
-@app.post("/signup")
+@app.post(path="/signup")
 async def signup_handler(user: User):
-    added_user = user.add()
-    if type(added_user) == User:
+    added_user: User = user.add()
+    if type(added_user) is User:
         return added_user
 
