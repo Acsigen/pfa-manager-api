@@ -129,6 +129,37 @@ def create_tables(cursor):
                 UNIQUE(name)
             )
             """
+        },
+        {
+            "table_name": "invoices",
+            "query": """
+            CREATE TABLE IF NOT EXISTS invoices (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                client_id INTEGER NOT NULL,
+                currency TEXT NOT NULL,
+                exchange_rate REAL NOT NULL,
+                invoice_date TEXT NOT NULL,
+                due_date TEXT NOT NULL,
+                status TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY(client_id) REFERENCES clients(id)
+                FOREIGN KEY(user_id) REFERENCES users(id)
+                UNIQUE(name)
+            )
+            """
+        },
+        {
+            "table_name": "invoice_items",
+            "query": """
+            CREATE TABLE IF NOT EXISTS invoice_items (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                ar_id INTEGER NOT NULL,
+                invoice_id INTEGER NOT NULL,
+                FOREIGN KEY(ar_id) REFERENCES activity_reports(id)
+                FOREIGN KEY(invoice_id) REFERENCES invoices(id)
+            )
+            """
         }
     ]
 
