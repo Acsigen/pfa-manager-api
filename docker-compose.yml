@@ -9,6 +9,8 @@ services:
         - acsigen/pfa-manager-api:latest
     container_name: pfa-manager-api
     restart: unless-stopped
+    user: 1000:1000
+    tty: true
     environment:
       - PFA_SECRET_KEY
     volumes:
