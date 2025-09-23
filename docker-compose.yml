@@ -1,5 +1,5 @@
 services:
-  pfa-api-manager:
+  pfa-manager-api:
     image: acsigen/pfa-manager-api
     build:
       context: .
