@@ -1,13 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from ..models.work_order import WorkOrder, show_work_order, list_work_orders, delete_work_order
+from .auth import get_current_user
+from typing import Annotated
 
 router: APIRouter = APIRouter(
     tags=["work_orders"]
 )
 
+user_dependency = Annotated[dict, Depends(dependency=get_current_user)]
+
 @router.post(path="/api/v1/clients/{client_id}/contracts/{contract_id}/wo")
-async def add_work_order_handler(contract_id: int, work_order: WorkOrder):
-    added_work_order: WorkOrder = work_order.add(contract_id=contract_id)
+async def add_work_order_handler(user: user_dependency, client_id: int, contract_id: int, work_order: WorkOrder):
+    added_work_order: WorkOrder = work_order.add(contract_id=contract_id, user_id=user.get("user_id"), client_id=client_id)
     if type(added_work_order) is WorkOrder:
         return added_work_order
 

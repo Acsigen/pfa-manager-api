@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 import sqlite3 # For error handling
 from ..database import db
+from .client import check_user_id
 
 class WorkOrder(BaseModel):
     id:  int | None = None
@@ -16,16 +17,18 @@ class WorkOrder(BaseModel):
     measurement_unit: str
     status: str | None = None
 
-    def add(self, contract_id: int):
-        query = "INSERT INTO work_orders(contract_id, name, final_client, client_project_code, start_date, end_date, price, currency, measurement_unit, status) VALUES (?,?,?,?,?,?,?,?,?,?)"
-        self.contract_id = contract_id
-        data: tuple = (self.contract_id, self.name, self.final_client, self.client_project_code,self.start_date,self.end_date,self.price,self.currency,self.measurement_unit,self.status)
-        try: 
-            res: sqlite3.Cursor = db.execute_query(query=query, params=data)
-            self.id = res.lastrowid
-            return self
-        except sqlite3.Error as e:
-            raise HTTPException(500,e.args[0])
+    def add(self, contract_id: int, user_id: int, client_id: int):
+        check_permissions: bool = check_user_id(client_id=client_id, user_id=user_id)
+        if check_permissions:
+            query = "INSERT INTO work_orders(contract_id, name, final_client, client_project_code, start_date, end_date, price, currency, measurement_unit, status) VALUES (?,?,?,?,?,?,?,?,?,?)"
+            self.contract_id = contract_id
+            data: tuple = (self.contract_id, self.name, self.final_client, self.client_project_code,self.start_date,self.end_date,self.price,self.currency,self.measurement_unit,self.status)
+            try: 
+                res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+                self.id = res.lastrowid
+                return self
+            except sqlite3.Error as e:
+                raise HTTPException(500,e.args[0])
 
     def update(self, contract_id, work_order_id):
         query = "UPDATE work_orders SET name = ?, final_client = ?, client_project_code = ?, start_date = ?, end_date = ?, price = ?, currency = ?, measurement_unit = ?, status = ? WHERE id == ? AND contract_id == ?"
