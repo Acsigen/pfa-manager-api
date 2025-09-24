@@ -23,7 +23,6 @@ async def auth_handler(form_data: Annotated[OAuth2PasswordRequestForm, Depends()
         return {"access_token": access_token, "token_type": "bearer"}
 
 
-async def get_current_user(token: Annotated[str, Depends(dependency=OAuth2PasswordBearer(tokenUrl="token"))]):
+async def get_current_user(token: Annotated[str, Depends(dependency=OAuth2PasswordBearer(tokenUrl="auth"))]):
     current_user: dict = validate_token(token=token)
-    print(current_user)
     return current_user
