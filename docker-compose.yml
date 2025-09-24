@@ -12,7 +12,7 @@ services:
     user: 1000:1000
     tty: true
     environment:
-      - PFA_SECRET_KEY
+      - SECRET_KEY
     volumes:
       - pfa-data:/app/data
     ports:
