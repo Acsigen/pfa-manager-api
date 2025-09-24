@@ -25,9 +25,9 @@ class Client(BaseModel):
         except sqlite3.IntegrityError as e:
             raise HTTPException(500,e.args[0])
 
-    def update(self, client_id):
+    def update(self, client_id, user_id):
         query = "UPDATE clients	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?	WHERE id = ?"
-        self.user_id = 0
+        self.user_id = user_id
         self.id = client_id
         data = (self.name, self.address, self.contact_person, self.country, self.phone_number, self.onrc_no, self.cui, self.id)
         try: 

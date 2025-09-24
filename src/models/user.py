@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 import sqlite3 # For error handling
 from ..database import db
-from ..utils.hash import hash_password
+from ..utils.hash import hash_password, verify_password
 
 class User(BaseModel):
     id: int | None = None
@@ -24,3 +24,21 @@ class User(BaseModel):
             return self
         except sqlite3.Error as e:
             raise HTTPException(500, e.args[0])
+
+def authenticate_user(username: str, password: str):
+    email_address = username
+    password = password
+    query = "SELECT id,password FROM users where email_address == ?"
+    data = (email_address,)
+    try:
+        res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+        retrieved_data: tuple = res.fetchone()
+        check_credentials: bool = verify_password(password=password, stored=retrieved_data[1])
+        if check_credentials:
+            user_id: int = retrieved_data[0]
+            return user_id
+        else:
+            raise HTTPException(401,"Invalid credentials")
+    except sqlite3.Error as e:
+        raise HTTPException(500, e.args[0])
+

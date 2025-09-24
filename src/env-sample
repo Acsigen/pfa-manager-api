@@ -1,0 +1,2 @@
+# Generated this with `openssl rand -hex 64`
+SECRET_KEY=

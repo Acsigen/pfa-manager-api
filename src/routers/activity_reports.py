@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from ..models.activity_report import ActivityReport, show_activity_report, list_activity_reports, delete_activity_report
 
-router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(
+    tags=["activity_reports"]
+)
 
 @router.post(path="/api/v1/clients/{client_id}/contracts/{contract_id}/wo/{wo_id}/ar")
 async def add_activity_report_handler(wo_id: int, activity_report: ActivityReport):

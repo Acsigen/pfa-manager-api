@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from ..models.work_order import WorkOrder, show_work_order, list_work_orders, delete_work_order
 
-router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(
+    tags=["work_orders"]
+)
 
 @router.post(path="/api/v1/clients/{client_id}/contracts/{contract_id}/wo")
 async def add_work_order_handler(contract_id: int, work_order: WorkOrder):

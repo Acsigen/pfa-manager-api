@@ -1,7 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from ..models.client import Client, delete_client, list_clients, show_client
+from .auth import get_current_user
+from typing import Annotated
 
-router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(
+    tags=["clients"]
+)
+
+user_dependency = Annotated[dict, Depends(dependency=get_current_user)]
 
 @router.post(path="/api/v1/clients")
 async def add_client_handler(client: Client):
@@ -10,8 +16,8 @@ async def add_client_handler(client: Client):
         return added_client
 
 @router.put(path="/api/v1/clients/{client_id}")
-async def update_client_handler(client_id: int, client: Client):
-    updated_client: Client = client.update(client_id=client_id)
+async def update_client_handler(user: user_dependency, client_id: int, client: Client):
+    updated_client: Client = client.update(client_id=client_id, user_id=user.get("user_id"))
     if type(updated_client) is Client:
         return updated_client
 

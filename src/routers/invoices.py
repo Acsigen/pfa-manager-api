@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from ..models.invoice import Invoice, delete_invoice, list_invoices, show_invoice
 
-router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(
+    tags=["invoices"]
+)
 
 @router.post(path="/api/v1/invoices")
 async def add_invoice_handler(invoice: Invoice):

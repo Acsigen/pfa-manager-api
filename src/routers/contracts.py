@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from ..models.contract import Contract, show_contract, list_contracts, delete_contract
 
-router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(
+    tags=["contracts"]
+)
 
 @router.post(path="/api/v1/clients/{client_id}/contracts")
 async def add_contract_handler(client_id:int, contract: Contract):

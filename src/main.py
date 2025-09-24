@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 from .database import db
 from .routers import clients, contracts, work_orders, activity_reports, invoices, auth
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
+
+if not getenv(key="SECRET_KEY"):
+    print("Missing SECRET_KEY. Exiting...")
+    exit(code=1)
 
 db.init_db()
 
