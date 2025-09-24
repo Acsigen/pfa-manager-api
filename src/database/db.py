@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_FILE = "./data/tutorial.db"
+DB_FILE = "./data/pfa-manager.db"
 
 def init_db():
     """
