@@ -93,6 +93,8 @@ def create_tables(cursor):
                 description TEXT,
                 cloud_storage_url TEXT,
                 client_id integer NOT NULL,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(client_id) REFERENCES clients(id)
             )
             """
@@ -112,6 +114,8 @@ def create_tables(cursor):
                 currency TEXT NOT NULL,
                 measurement_unit TEXT NOT NULL,
                 status TEXT,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(contract_id) REFERENCES contracts(id),
                 UNIQUE(name)
             )
@@ -126,6 +130,8 @@ def create_tables(cursor):
                 name TEXT NOT NULL,
                 date TEXT NOT NULL,
                 hours_amount REAL NOT NULL,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(wo_id) REFERENCES work_orders(id),
                 UNIQUE(name)
             )
@@ -144,8 +150,8 @@ def create_tables(cursor):
                 due_date TEXT NOT NULL,
                 status TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
-                FOREIGN KEY(client_id) REFERENCES clients(id)
-                FOREIGN KEY(user_id) REFERENCES users(id)
+                FOREIGN KEY(client_id) REFERENCES clients(id),
+                FOREIGN KEY(user_id) REFERENCES users(id),
                 UNIQUE(name)
             )
             """
@@ -157,7 +163,7 @@ def create_tables(cursor):
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 ar_id INTEGER NOT NULL,
                 invoice_id INTEGER NOT NULL,
-                FOREIGN KEY(ar_id) REFERENCES activity_reports(id)
+                FOREIGN KEY(ar_id) REFERENCES activity_reports(id),
                 FOREIGN KEY(invoice_id) REFERENCES invoices(id)
             )
             """

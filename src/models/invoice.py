@@ -78,7 +78,7 @@ def list_invoices():
 
 def delete_invoice(invoice_id: int):
     query = "DELETE FROM invoices WHERE id == ?"
-    data = (invoice_id,)
+    data: tuple[int] = (invoice_id,)
     try: 
         _: sqlite3.Cursor = db.execute_query(query=query, params=data)
         return True

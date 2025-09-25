@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from fastapi import HTTPException
-import sqlite3 # For error handling
+import sqlite3
 from ..database import db
-from .client import check_user_id
+from ..utils.permissions import check_permissions
 
 class Contract(BaseModel):
     id: int | None = None
@@ -12,14 +12,16 @@ class Contract(BaseModel):
     description: str | None = None
     cloud_storage_url: str | None = None
     client_id: int | None = 0
+    user_id: int | None = 0
 
 
     def add(self, client_id, user_id: int):
-        check_permissions: bool = check_user_id(client_id=client_id, user_id=user_id)
-        if check_permissions:
-            query = "INSERT INTO contracts(contract_no, start_date, end_date, description, cloud_storage_url, client_id) VALUES (?,?,?,?,?,?)"
+        permitted_action: bool = check_permissions(item_id=client_id, current_user_id=user_id, table_name="clients")
+        if permitted_action:
+            query = "INSERT INTO contracts(contract_no, start_date, end_date, description, cloud_storage_url, client_id, user_id) VALUES (?,?,?,?,?,?,?)"
             self.client_id = client_id
-            data: tuple = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.client_id)
+            self.user_id = user_id
+            data: tuple = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.client_id, self.user_id)
             try: 
                 res: sqlite3.Cursor = db.execute_query(query=query, params=data)
                 self.id = res.lastrowid
@@ -28,12 +30,13 @@ class Contract(BaseModel):
                 raise HTTPException(500,e.args[0])
 
     def update(self, contract_id: int, client_id: int, user_id: int):
-        check_permissions: bool = check_user_id(client_id=client_id, user_id=user_id)
-        if check_permissions:
-            query = "UPDATE contracts SET contract_no = ?, start_date = ?, end_date = ?, description = ?, cloud_storage_url = ? WHERE id = ? AND client_id == ?"
+        permitted_action: bool = check_permissions(item_id=contract_id, current_user_id=user_id, table_name="contracts")
+        if permitted_action:
+            query = "UPDATE contracts SET contract_no = ?, start_date = ?, end_date = ?, description = ?, cloud_storage_url = ? WHERE id = ? AND client_id == ? AND user_id == ?"
             self.id = contract_id
             self.client_id = client_id
-            data = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.id, self.client_id)
+            self.user_id = user_id
+            data = (self.contract_no, self.start_date, self.end_date, self.description, self.cloud_storage_url, self.id, self.client_id, self.user_id)
             try: 
                 checkout_contract = show_contract(contract_id=contract_id, client_id=client_id, user_id=user_id)
                 if type(checkout_contract) is Contract:
@@ -45,10 +48,10 @@ class Contract(BaseModel):
                 raise HTTPException(500,e.args[0])
 
 def show_contract(contract_id: int, client_id: int, user_id: int):
-    check_permissions: bool = check_user_id(client_id=client_id, user_id=user_id)
-    if check_permissions:
-        query = "SELECT * FROM contracts WHERE id == ? AND client_id == ?"
-        data = (contract_id, client_id)
+    permitted_action: bool = check_permissions(item_id=contract_id, current_user_id=user_id, table_name="contracts")
+    if permitted_action:
+        query = "SELECT * FROM contracts WHERE id == ? AND client_id == ? AND user_id == ?"
+        data = (contract_id, client_id, user_id)
         try: 
             res: sqlite3.Cursor = db.execute_query(query=query, params=data)
             row: tuple = res.fetchone()
@@ -60,7 +63,8 @@ def show_contract(contract_id: int, client_id: int, user_id: int):
                                 end_date=row[3],
                                 description=row[4],
                                 cloud_storage_url=row[5],
-                                client_id=row[6]
+                                client_id=row[6],
+                                user_id=row[7],
                 )
                 return contract
             else:
@@ -69,11 +73,9 @@ def show_contract(contract_id: int, client_id: int, user_id: int):
             raise HTTPException(500,e.args[0])
 
 def list_user_contracts(client_id: int, user_id: int):
-    check_permissions: bool = check_user_id(client_id=client_id, user_id=user_id)
-    if check_permissions:
         contract_list: list[Contract] = []
-        query = "SELECT * FROM contracts WHERE client_id == ?"
-        data: tuple = (client_id,)
+        query = "SELECT * FROM contracts WHERE client_id == ? AND user_id == ?"
+        data: tuple = (client_id, user_id)
         try: 
             res: sqlite3.Cursor = db.execute_query(query=query, params=data)
             rows: list[tuple] = res.fetchall()
@@ -84,17 +86,18 @@ def list_user_contracts(client_id: int, user_id: int):
                                 end_date=row[3],
                                 description=row[4],
                                 cloud_storage_url=row[5],
-                                client_id=row[6])
+                                client_id=row[6],
+                                user_id=row[7])
                 contract_list.append(contract)
             return contract_list
         except sqlite3.OperationalError as e:
             raise HTTPException(500,e.args[0])
 
 def delete_user_contract(contract_id: int, client_id: int, user_id: int):
-    check_permissions: bool = check_user_id(client_id=client_id, user_id=user_id)
-    if check_permissions:
-        query = "DELETE FROM contracts WHERE id == ? AND client_id == ?"
-        data = (contract_id,client_id)
+    permitted_action: bool = check_permissions(item_id=contract_id, current_user_id=user_id, table_name="contracts")
+    if permitted_action:
+        query = "DELETE FROM contracts WHERE id == ? AND client_id == ? AND user_id == ?"
+        data = (contract_id,client_id, user_id)
         try: 
             checkout_contract = show_contract(contract_id=contract_id, client_id=client_id, user_id=user_id)
             if type(checkout_contract) is Contract:
