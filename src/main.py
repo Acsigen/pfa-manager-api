@@ -19,7 +19,7 @@ app.include_router(router=clients.router)
 app.include_router(router=contracts.router)
 app.include_router(router=work_orders.router)
 app.include_router(router=activity_reports.router)
-app.include_router(router=invoices.router)
+# app.include_router(router=invoices.router)
 
 @app.get(path="/")
 async def root():
