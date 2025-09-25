@@ -57,5 +57,5 @@ async def list_work_orders_handler(user: user_dependency, client_id: int, contra
 async def delete_work_order_handler(
     user: user_dependency, client_id: int, contract_id: int, wo_id: int
 ):
-    if delete_user_work_order(client_id=client_id, contract_id=contract_id, work_order_id=wo_id) is True:
+    if delete_user_work_order(client_id=client_id, contract_id=contract_id, work_order_id=wo_id, user_id=user.get("user_id")) is True:
         return "Work order deleted"

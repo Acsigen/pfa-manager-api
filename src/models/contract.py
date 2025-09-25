@@ -131,7 +131,7 @@ def list_user_contracts(client_id: int, user_id: int):
 
 def delete_user_contract(contract_id: int, client_id: int, user_id: int):
     permitted_action: bool = check_permissions(
-        client_id=client_id, current_user_id=user_id, table_name="contracts"
+        client_id=client_id, current_user_id=user_id, contract_id=contract_id
     )
     if permitted_action:
         query = (
