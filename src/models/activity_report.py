@@ -2,8 +2,6 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 import sqlite3  # For error handling
 from ..database import db
-from ..utils.permissions import check_permissions
-
 
 class ActivityReport(BaseModel):
     id: int | None = None
@@ -44,7 +42,14 @@ class ActivityReport(BaseModel):
             self.id = ar_id
             self.wo_id = wo_id
             self.user_id = user_id
-            data = (self.name, self.date, self.hours_amount, self.id, self.wo_id, self.user_id)
+            data = (
+                self.name,
+                self.date,
+                self.hours_amount,
+                self.id,
+                self.wo_id,
+                self.user_id,
+            )
             try:
                 _: sqlite3.Cursor = db.execute_query(query=query, params=data)
                 updated_activity_report: ActivityReport = show_activity_report(
@@ -112,7 +117,9 @@ def delete_activity_report(wo_id: int, activity_report_id: int, user_id: int):
         table_name="activity_reports",
     )
     if permitted_action:
-        query = "DELETE FROM activity_reports WHERE id == ? AND wo_id == ? AND user_id == ?"
+        query = (
+            "DELETE FROM activity_reports WHERE id == ? AND wo_id == ? AND user_id == ?"
+        )
         data = (activity_report_id, wo_id, user_id)
         try:
             checkout_ar = show_activity_report(

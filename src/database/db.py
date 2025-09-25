@@ -3,6 +3,7 @@ import os
 
 DB_FILE = "./data/pfa-manager.db"
 
+
 def init_db():
     """
     Initializes the database by creating tables.
@@ -10,7 +11,7 @@ def init_db():
     """
     # Create the 'data' directory if it doesn't exist
     os.makedirs(name=os.path.dirname(p=DB_FILE), exist_ok=True)
-    
+
     try:
         with sqlite3.connect(database=DB_FILE) as con:
             cursor: sqlite3.Cursor = con.cursor()
@@ -20,12 +21,14 @@ def init_db():
         print(f"Error initializing the database: {e}")
         raise
 
+
 def get_db_connection():
     """
     Returns a new database connection object.
     It's the caller's responsibility to manage this connection.
     """
     return sqlite3.connect(database=DB_FILE)
+
 
 def execute_query(query, params=None):
     """
@@ -46,6 +49,7 @@ def execute_query(query, params=None):
         # The 'with' statement handles the rollback
         raise
 
+
 def create_tables(cursor):
     # This function remains the same as in the previous example
     tables = [
@@ -61,7 +65,7 @@ def create_tables(cursor):
                 password TEXT NOT NULL,
                 UNIQUE(email_address, phone_number)
             )
-            """
+            """,
         },
         {
             "table_name": "clients",
@@ -79,7 +83,7 @@ def create_tables(cursor):
                 UNIQUE(onrc_no, cui),
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )
-            """
+            """,
         },
         {
             "table_name": "contracts",
@@ -96,7 +100,7 @@ def create_tables(cursor):
                 FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(client_id) REFERENCES clients(id)
             )
-            """
+            """,
         },
         {
             "table_name": "work_orders",
@@ -118,7 +122,7 @@ def create_tables(cursor):
                 FOREIGN KEY(contract_id) REFERENCES contracts(id),
                 UNIQUE(name)
             )
-            """
+            """,
         },
         {
             "table_name": "activity_reports",
@@ -134,7 +138,7 @@ def create_tables(cursor):
                 FOREIGN KEY(wo_id) REFERENCES work_orders(id),
                 UNIQUE(name)
             )
-            """
+            """,
         },
         {
             "table_name": "invoices",
@@ -153,7 +157,7 @@ def create_tables(cursor):
                 FOREIGN KEY(user_id) REFERENCES users(id),
                 UNIQUE(name)
             )
-            """
+            """,
         },
         {
             "table_name": "invoice_items",
@@ -165,13 +169,13 @@ def create_tables(cursor):
                 FOREIGN KEY(ar_id) REFERENCES activity_reports(id),
                 FOREIGN KEY(invoice_id) REFERENCES invoices(id)
             )
-            """
-        }
+            """,
+        },
     ]
 
     for table in tables:
         try:
-            cursor.execute(table['query'])
+            cursor.execute(table["query"])
             print(f"Created {table['table_name']} table")
         except sqlite3.Error as e:
             print(f"Error creating {table['table_name']} table: {e}")

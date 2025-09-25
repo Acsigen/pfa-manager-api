@@ -3,6 +3,7 @@ from fastapi import HTTPException
 import sqlite3
 from ..database import db
 
+
 class Contract(BaseModel):
     id: int | None = None
     contract_no: str
@@ -102,8 +103,8 @@ def show_contract(contract_id: int, client_id: int, user_id: int):
 
 def list_user_contracts(client_id: int, user_id: int):
     permitted_action: bool = check_permissions(
-            client_id=client_id, current_user_id=user_id
-        )
+        client_id=client_id, current_user_id=user_id
+    )
     if permitted_action:
         contract_list: list[Contract] = []
         query = "SELECT * FROM contracts WHERE client_id == ? AND user_id == ?"
@@ -158,7 +159,7 @@ def check_permissions(
             FROM contracts AS ctr
             JOIN clients AS cli on ctr.client_id = cli.id
             WHERE ctr.id = ? AND cli.id = ?;"""
-        data = (contract_id,client_id)
+        data = (contract_id, client_id)
     else:
         query = "SELECT user_id FROM clients WHERE id == ?"
         data = (client_id,)
@@ -168,7 +169,9 @@ def check_permissions(
         if row:
             retrieved_user_id: int = int(row[0])
         else:
-            raise HTTPException(status_code=403, detail="You are not allowed to perform this action")
+            raise HTTPException(
+                status_code=403, detail="You are not allowed to perform this action"
+            )
     except sqlite3.Error as e:
         raise HTTPException(500, e.args[0])
     if retrieved_user_id == current_user_id:

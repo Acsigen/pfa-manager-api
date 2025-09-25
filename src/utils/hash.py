@@ -22,19 +22,21 @@ Functions:
 """
 
 
-
 # Tune iterations to your environment. Higher is slower but more resistant to brute force.
 DEFAULT_ITERATIONS = 200_000
 SALT_LEN: int = 16  # bytes
-DK_LEN: int = 32    # bytes (256-bit)
+DK_LEN: int = 32  # bytes (256-bit)
+
 
 def _b64(x: bytes) -> str:
     return base64.urlsafe_b64encode(s=x).rstrip(b"=").decode(encoding="ascii")
 
+
 def _b64decode(s: str) -> bytes:
     # pad base64 string if needed
-    padding = '=' * (-len(s) % 4)
+    padding = "=" * (-len(s) % 4)
     return base64.urlsafe_b64decode(s=s + padding)
+
 
 def hash_password(password: str, iterations: int = DEFAULT_ITERATIONS) -> str:
     """
@@ -44,8 +46,15 @@ def hash_password(password: str, iterations: int = DEFAULT_ITERATIONS) -> str:
     if not isinstance(password, str):
         raise TypeError("password must be a str")
     salt: bytes = os.urandom(SALT_LEN)
-    dk: bytes = hashlib.pbkdf2_hmac(hash_name="sha256", password=password.encode(encoding="utf-8"), salt=salt, iterations=iterations, dklen=DK_LEN)
+    dk: bytes = hashlib.pbkdf2_hmac(
+        hash_name="sha256",
+        password=password.encode(encoding="utf-8"),
+        salt=salt,
+        iterations=iterations,
+        dklen=DK_LEN,
+    )
     return f"pbkdf2_sha256${iterations}${_b64(x=salt)}${_b64(x=dk)}"
+
 
 def verify_password(password: str, stored: str) -> bool:
     """
@@ -69,6 +78,12 @@ def verify_password(password: str, stored: str) -> bool:
     salt: bytes = _b64decode(s=salt_b64)
     expected: bytes = _b64decode(s=dk_b64)
 
-    new_dk: bytes = hashlib.pbkdf2_hmac(hash_name="sha256", password=password.encode(encoding="utf-8"), salt=salt, iterations=iterations, dklen=len(expected))
+    new_dk: bytes = hashlib.pbkdf2_hmac(
+        hash_name="sha256",
+        password=password.encode(encoding="utf-8"),
+        salt=salt,
+        iterations=iterations,
+        dklen=len(expected),
+    )
     # Use constant-time comparison
     return secrets.compare_digest(new_dk, expected)
