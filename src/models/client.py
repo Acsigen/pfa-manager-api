@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 import sqlite3 # For error handling
 from ..database import db
-from ..utils.permissions import check_permissions
 
 class Client(BaseModel):
     id: int | None = None
@@ -26,8 +25,8 @@ class Client(BaseModel):
         except sqlite3.IntegrityError as e:
             raise HTTPException(500,e.args[0])
 
-    def update(self, client_id, user_id):
-        permitted_action: bool = check_permissions(item_id=client_id, current_user_id=user_id, table_name="clients")
+    def update(self, client_id: int, user_id: int):
+        permitted_action: bool = check_permissions(client_id=client_id, current_user_id=user_id)
         if permitted_action:
             query = "UPDATE clients	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?	WHERE id == ? AND user_id == ?"
             self.user_id = user_id
@@ -40,7 +39,7 @@ class Client(BaseModel):
                 raise HTTPException(500,e.args[0])
     
 def show_user_client(client_id: int, user_id: int):
-    permitted_action: bool = check_permissions(item_id=client_id, current_user_id=user_id, table_name="clients")
+    permitted_action: bool = check_permissions(client_id=client_id, current_user_id=user_id)
     if permitted_action:
         query = "SELECT * FROM clients WHERE id == ? AND user_id == ?"
         data = (client_id, user_id)
@@ -84,7 +83,7 @@ def list_user_clients(user_id: int):
         raise HTTPException(500,e.args[0])
 
 def delete_client(client_id: int, user_id: int):
-    permitted_action: bool = check_permissions(item_id=client_id, current_user_id=user_id, table_name="clients")
+    permitted_action: bool = check_permissions(client_id=client_id, current_user_id=user_id)
     if permitted_action:
         query = "DELETE FROM clients WHERE id == ? AND user_id == ?"
         data = (client_id, user_id)
@@ -93,3 +92,22 @@ def delete_client(client_id: int, user_id: int):
             return True
         except sqlite3.IntegrityError as e:
             raise HTTPException(500,e.args[0])
+
+def check_permissions(current_user_id: int, client_id: int):
+    query = "SELECT user_id FROM clients WHERE id == ?"
+    data = (client_id,)
+    try:
+        res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+        row: tuple = res.fetchone()
+        if row:
+            item_user_id: int = int(row[0])
+        else:
+            raise HTTPException(status_code=404, detail="No such client")
+    except sqlite3.Error as e:
+        raise HTTPException(500, e.args[0])
+    if item_user_id == current_user_id:
+        return True
+    else:
+        raise HTTPException(
+            status_code=403, detail="You are not allowed to perform this action"
+        )
