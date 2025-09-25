@@ -158,7 +158,7 @@ def check_permissions(
         query = """SELECT ctr.user_id
             FROM contracts AS ctr
             JOIN clients AS cli on ctr.client_id = cli.id
-            WHERE ctr.id = ? AND cli.id = ?;"""
+            WHERE ctr.id = ? AND cli.id = ?"""
         data = (contract_id, client_id)
     else:
         query = "SELECT user_id FROM clients WHERE id == ?"

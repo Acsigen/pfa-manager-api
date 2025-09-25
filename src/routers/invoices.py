@@ -1,38 +1,54 @@
-from fastapi import APIRouter
-from ..models.invoice import Invoice, delete_invoice, list_invoices, show_invoice
+from fastapi import APIRouter, Depends
+from ..models.invoice import Invoice, InvoiceItem, delete_invoice, list_user_invoices, list_client_invoices, show_invoice
+from .auth import get_current_user
+from typing import Annotated
 
 router: APIRouter = APIRouter(tags=["invoices"])
 
+user_dependency = Annotated[dict, Depends(dependency=get_current_user)]
 
 @router.post(path="/api/v1/invoices")
-async def add_invoice_handler(invoice: Invoice):
-    added_invoice: Invoice = invoice.add()
+async def add_invoice_handler(user: user_dependency, invoice: Invoice):
+    added_invoice: Invoice = invoice.add(user_id=user.get("user_id"))
     if type(added_invoice) is Invoice:
         return added_invoice
 
+# TODO: Implement function to add items to invoice
+# @router.post(path="/api/v1/invoices/{invoice_id}/items")
+# async def add_invoice_items_handler(invoice_id,):
+#     added_invoice: Invoice = invoice.add()
+#     if type(added_invoice) is Invoice:
+#         return added_invoice
+
 
 @router.put(path="/api/v1/invoices/{invoice_id}")
-async def update_invoice_handler(invoice_id: int, invoice: Invoice):
-    updated_invoice: Invoice = invoice.update(invoice_id=invoice_id)
+async def update_invoice_handler(user: user_dependency, invoice_id: int, invoice: Invoice):
+    updated_invoice: Invoice = invoice.update(user_id=user.get("user_id"), invoice_id=invoice_id)
     if type(updated_invoice) is Invoice:
         return updated_invoice
 
 
 @router.get(path="/api/v1/invoices/{invoice_id}")
-async def show_invoice_handler(invoice_id: int):
-    invoice: Invoice = show_invoice(invoice_id=invoice_id)
+async def show_invoice_handler(user: user_dependency, invoice_id: int):
+    invoice: Invoice = show_invoice(user_id=user.get("user_id"), invoice_id=invoice_id)
     if type(invoice) is Invoice:
         return invoice
 
 
 @router.get(path="/api/v1/invoices")
-async def list_invoices_handler():
-    invoice_list: list = list_invoices()
+async def list_user_invoices_handler(user: user_dependency):
+    invoice_list: list = list_user_invoices(user_id=user.get("user_id"))
+    if type(invoice_list) is list:
+        return invoice_list
+
+@router.get(path="/api/v1/invoices/")
+async def list_client_invoices_handler(user: user_dependency, client_id: int):
+    invoice_list: list = list_client_invoices(user_id=user.get("user_id"), client_id=client_id)
     if type(invoice_list) is list:
         return invoice_list
 
 
 @router.delete(path="/api/v1/invoices/{invoice_id}")
-async def delete_invoice_handler(invoice_id: int):
-    if delete_invoice(invoice_id=invoice_id):
+async def delete_invoice_handler(user: user_dependency, invoice_id: int):
+    if delete_invoice(user_id=user.get("user_id"), invoice_id=invoice_id):
         return "Invoice deleted"
