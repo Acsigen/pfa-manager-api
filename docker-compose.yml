@@ -5,14 +5,14 @@ services:
       context: .
       dockerfile: Dockerfile
       tags:
-        - acsigen/pfa-manager-api:v0.6.0
+        - acsigen/pfa-manager-api:v0.8.0
         - acsigen/pfa-manager-api:latest
     container_name: pfa-manager-api
     restart: unless-stopped
     user: 1000:1000
     tty: true
     environment:
-      - PFA_SECRET_KEY
+      - SECRET_KEY
     volumes:
       - pfa-data:/app/data
     ports:
