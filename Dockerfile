@@ -17,4 +17,4 @@ RUN pip install -r requirements.txt
 EXPOSE 8000
 
 ENTRYPOINT ["/home/pfa.manager/.local/bin/fastapi"]
-CMD ["dev", "main.py"]
+CMD ["run", "main.py"]
