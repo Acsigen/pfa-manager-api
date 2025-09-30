@@ -16,7 +16,7 @@ class User(BaseModel):
     def add(self):
         query = "INSERT INTO users(first_name, last_name, phone_number, email_address, password) VALUES (?, ?, ?, ?, ?)"
         self.password = hash_password(password=self.password)
-        data = (
+        data: tuple = (
             self.first_name,
             self.last_name,
             self.phone_number,
@@ -29,14 +29,14 @@ class User(BaseModel):
             self.password = "REDACTED"
             return self
         except sqlite3.Error as e:
-            raise HTTPException(500, e.args[0])
+            raise HTTPException(status_code=500, detail=e.args[0])
 
 
 def authenticate_user(username: str, password: str):
-    email_address = username
+    email_address: str = username
     password = password
     query = "SELECT id,password FROM users where email_address == ?"
-    data = (email_address,)
+    data: tuple = (email_address,)
     try:
         res: sqlite3.Cursor = db.execute_query(query=query, params=data)
         retrieved_data: tuple = res.fetchone()
@@ -48,6 +48,6 @@ def authenticate_user(username: str, password: str):
             user_id: int = retrieved_data[0]
             return user_id
         else:
-            raise HTTPException(401, "Invalid credentials")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
     except sqlite3.Error as e:
-        raise HTTPException(500, e.args[0])
+        raise HTTPException(status_code=500, detail=e.args[0])

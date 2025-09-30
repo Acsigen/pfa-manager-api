@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 
-RUN useradd -m -s /bin/bash pfa.manager && mkdir /app
+RUN useradd -m -s /bin/bash pfa.manager && mkdir /app && mkdir -p /app/data
 
 WORKDIR /app
 
@@ -17,4 +17,4 @@ RUN pip install -r requirements.txt
 EXPOSE 8000
 
 ENTRYPOINT ["/home/pfa.manager/.local/bin/fastapi"]
-CMD ["dev", "main.py"]
+CMD ["run", "main.py"]

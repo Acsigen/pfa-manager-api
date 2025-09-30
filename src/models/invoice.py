@@ -3,12 +3,32 @@ from fastapi import HTTPException
 import sqlite3  # For error handling
 from ..database import db
 
-# TODO: Identify a way to add items to an invoice usint the invoice_items table
-
 class InvoiceItem(BaseModel):
     id: int | None = None
-    invoice_id: int
-    item_id: int
+    ar_id: int
+    invoice_id: int | None = None
+
+    def add(self):
+        query = "INSERT INTO invoice_items(ar_id, invoice_id) VALUES (?,?)"
+        data: tuple = (self.ar_id, self.invoice_id)
+        try:
+            res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            self.id = res.lastrowid
+            return self
+        except sqlite3.IntegrityError as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
+        except sqlite3.Error as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
+        
+def delete_invoice_item(item_id: int):
+    query = "DELETE FROM invoice_items WHERE id == ?"
+    data: tuple = (item_id,)
+    try:
+        _: sqlite3.Cursor = db.execute_query(query=query, params=data)
+        return True
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=e.args[0])
+
 
 class Invoice(BaseModel):
     id: int | None = None
@@ -28,7 +48,7 @@ class Invoice(BaseModel):
         if permitted_action:
             query = "INSERT INTO invoices(name, currency, exchange_rate, invoice_date, due_date, status, client_id, user_id) VALUES (?,?,?,?,?,?,?,?)"
             self.user_id = user_id
-            data = (
+            data: tuple = (
                 self.name,
                 self.currency,
                 self.exchange_rate,
@@ -43,7 +63,7 @@ class Invoice(BaseModel):
                 self.id = res.lastrowid
                 return self
             except sqlite3.IntegrityError as e:
-                raise HTTPException(500, e.args[0])
+                raise HTTPException(status_code=500, detail=e.args[0])
 
     def update(self, user_id: int, invoice_id: int):
         permitted_action: bool = check_permissions(
@@ -53,7 +73,7 @@ class Invoice(BaseModel):
             query = "UPDATE invoices SET name = ?, currency = ?, exchange_rate = ?, invoice_date = ?, due_date = ?, status =?	WHERE id = ? AND user_id = ?"
             self.user_id = user_id
             self.id = invoice_id
-            data = (
+            data: tuple = (
                 self.name,
                 self.currency,
                 self.exchange_rate,
@@ -67,12 +87,12 @@ class Invoice(BaseModel):
                 _: sqlite3.Cursor = db.execute_query(query=query, params=data)
                 return self
             except sqlite3.IntegrityError as e:
-                raise HTTPException(500, e.args[0])
+                raise HTTPException(status_code=500, detail=e.args[0])
 
 
 def show_invoice(user_id:int, invoice_id: int):
     query = "SELECT * FROM invoices WHERE id == ? AND user_id = ?"
-    data = (invoice_id, user_id)
+    data: tuple = (invoice_id, user_id)
     try:
         res: sqlite3.Cursor = db.execute_query(query=query, params=data)
         row: tuple = res.fetchone()
@@ -89,13 +109,13 @@ def show_invoice(user_id:int, invoice_id: int):
         )
         return invoice
     except sqlite3.IntegrityError as e:
-        raise HTTPException(500, e.args[0])
+        raise HTTPException(status_code=500, detail=e.args[0])
 
 
 def list_user_invoices(user_id: int):
     invoice_list: list[Invoice] = []
     query = "SELECT * FROM invoices WHERE user_id = ?"
-    data = (user_id,)
+    data: tuple = (user_id,)
     try:
         res: sqlite3.Cursor = db.execute_query(query=query, params=data)
         rows: list[tuple] = res.fetchall()
@@ -114,7 +134,7 @@ def list_user_invoices(user_id: int):
             invoice_list.append(invoice)
         return invoice_list
     except sqlite3.OperationalError as e:
-        raise HTTPException(500, e.args[0])
+        raise HTTPException(status_code=500, detail=e.args[0])
 
 def list_client_invoices(client_id:int, user_id: int):
     permitted_action: bool = check_permissions(
@@ -123,7 +143,7 @@ def list_client_invoices(client_id:int, user_id: int):
     if permitted_action:
         invoice_list: list[Invoice] = []
         query = "SELECT * FROM invoices WHERE user_id = ? AND client_id = ?"
-        data = (user_id,client_id)
+        data: tuple = (user_id,client_id)
         try:
             res: sqlite3.Cursor = db.execute_query(query=query, params=data)
             rows: list[tuple] = res.fetchall()
@@ -142,18 +162,18 @@ def list_client_invoices(client_id:int, user_id: int):
                 invoice_list.append(invoice)
             return invoice_list
         except sqlite3.OperationalError as e:
-            raise HTTPException(500, e.args[0])
+            raise HTTPException(status_code=500, detail=e.args[0])
 
 # TODO: check if invoice exists before deletion for proper output messaging.
 # Currently if a user deletes a non existent invoice, it will confirm. This can cause confusion where we will have multiple invoices
 def delete_invoice(user_id: int, invoice_id: int):
         query = "DELETE FROM invoices WHERE id == ? AND user_id == ?"
-        data: tuple[int] = (invoice_id,user_id)
+        data: tuple = (invoice_id,user_id)
         try:
             _: sqlite3.Cursor = db.execute_query(query=query, params=data)
             return True
         except sqlite3.IntegrityError as e:
-            raise HTTPException(500, e.args[0])
+            raise HTTPException(status_code=500, detail=e.args[0])
 
 
 def check_permissions(
@@ -164,10 +184,10 @@ def check_permissions(
             FROM invoices AS inv
             JOIN clients AS cli on inv.client_id = cli.id
             WHERE inv.id = ? AND cli.id = ?"""
-        data = (invoice_id, client_id)
+        data: tuple = (invoice_id, client_id)
     else:
         query = "SELECT user_id FROM clients WHERE id == ?"
-        data = (client_id,)
+        data: tuple = (client_id,)
     try:
         res: sqlite3.Cursor = db.execute_query(query=query, params=data)
         row: tuple = res.fetchone()
@@ -178,7 +198,7 @@ def check_permissions(
                 status_code=403, detail="You are not allowed to perform this action"
             )
     except sqlite3.Error as e:
-        raise HTTPException(500, e.args[0])
+        raise HTTPException(status_code=500, detail=e.args[0])
     if retrieved_user_id == current_user_id:
         return True
     else:

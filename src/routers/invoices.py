@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from ..models.invoice import Invoice, InvoiceItem, delete_invoice, list_user_invoices, list_client_invoices, show_invoice
+from ..models.invoice import Invoice, InvoiceItem, delete_invoice, list_user_invoices, list_client_invoices, show_invoice, delete_invoice_item
 from .auth import get_current_user
 from typing import Annotated
 
@@ -13,12 +13,19 @@ async def add_invoice_handler(user: user_dependency, invoice: Invoice):
     if type(added_invoice) is Invoice:
         return added_invoice
 
+
 # TODO: Implement function to add items to invoice
-# @router.post(path="/api/v1/invoices/{invoice_id}/items")
-# async def add_invoice_items_handler(invoice_id,):
-#     added_invoice: Invoice = invoice.add()
-#     if type(added_invoice) is Invoice:
-#         return added_invoice
+@router.post(path="/api/v1/invoices/{invoice_id}/items")
+async def add_invoice_items_handler(invoice_item: InvoiceItem, invoice_id: int):
+    invoice_item.invoice_id = invoice_id
+    added_item: InvoiceItem = invoice_item.add()
+    if type(added_item) is InvoiceItem:
+        return added_item
+
+@router.delete(path="/api/v1/invoices/{invoice_id}/items/{item_id}")
+async def delete_invoice_items_handler(invoice_id: int, item_id: int):
+    if delete_invoice_item(item_id=item_id):
+        return "Item deleted"
 
 
 @router.put(path="/api/v1/invoices/{invoice_id}")
