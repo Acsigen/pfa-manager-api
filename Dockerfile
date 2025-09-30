@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 
-RUN useradd -m -s /bin/bash pfa.manager && mkdir /app
+RUN useradd -m -s /bin/bash pfa.manager && mkdir /app && mkdir -p /app/data
 
 WORKDIR /app
 

@@ -50,9 +50,9 @@ def execute_query(query, params=None):
         raise
 
 
-def create_tables(cursor):
+def create_tables(cursor: sqlite3.Cursor):
     # This function remains the same as in the previous example
-    tables = [
+    tables: list[dict] = [
         {
             "table_name": "users",
             "query": """
@@ -60,10 +60,9 @@ def create_tables(cursor):
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 first_name TEXT NOT NULL,
                 last_name TEXT NOT NULL,
-                phone_number TEXT NOT NULL,
-                email_address TEXT NOT NULL,
-                password TEXT NOT NULL,
-                UNIQUE(email_address, phone_number)
+                phone_number TEXT NOT NULL UNIQUE,
+                email_address TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL
             )
             """,
         },
@@ -80,7 +79,9 @@ def create_tables(cursor):
                 onrc_no TEXT NOT NULL,
                 cui TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
-                UNIQUE(onrc_no, cui),
+                UNIQUE(onrc_no, user_id),
+                UNIQUE(cui, user_id),
+                UNIQUE(name, user_id),
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """,
@@ -97,6 +98,7 @@ def create_tables(cursor):
                 cloud_storage_url TEXT,
                 client_id integer NOT NULL,
                 user_id INTEGER NOT NULL,
+                UNIQUE(contract_no,client_id),
                 FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(client_id) REFERENCES clients(id)
             )
@@ -118,9 +120,9 @@ def create_tables(cursor):
                 measurement_unit TEXT NOT NULL,
                 status TEXT,
                 user_id INTEGER NOT NULL,
+                UNIQUE(name, contract_id),
                 FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(contract_id) REFERENCES contracts(id),
-                UNIQUE(name)
+                FOREIGN KEY(contract_id) REFERENCES contracts(id)
             )
             """,
         },
@@ -134,9 +136,9 @@ def create_tables(cursor):
                 date TEXT NOT NULL,
                 hours_amount REAL NOT NULL,
                 user_id INTEGER NOT NULL,
+                UNIQUE(name, user_id),
                 FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(wo_id) REFERENCES work_orders(id),
-                UNIQUE(name)
+                FOREIGN KEY(wo_id) REFERENCES work_orders(id)
             )
             """,
         },
@@ -145,7 +147,7 @@ def create_tables(cursor):
             "query": """
             CREATE TABLE IF NOT EXISTS invoices (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
+                name TEXT NOT NULL UNIQUE,
                 client_id INTEGER NOT NULL,
                 currency TEXT NOT NULL,
                 exchange_rate REAL NOT NULL,
@@ -154,8 +156,7 @@ def create_tables(cursor):
                 status TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 FOREIGN KEY(client_id) REFERENCES clients(id),
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                UNIQUE(name)
+                FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """,
         },
@@ -166,6 +167,7 @@ def create_tables(cursor):
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 ar_id INTEGER NOT NULL,
                 invoice_id INTEGER NOT NULL,
+                UNIQUE(ar_id, invoice_id),
                 FOREIGN KEY(ar_id) REFERENCES activity_reports(id),
                 FOREIGN KEY(invoice_id) REFERENCES invoices(id)
             )
