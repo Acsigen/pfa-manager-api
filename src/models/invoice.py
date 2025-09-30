@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 import sqlite3  # For error handling
 from ..database import db
+from .activity_report import ActivityReport
 
 class InvoiceItem(BaseModel):
     id: int | None = None
@@ -29,6 +30,49 @@ def delete_invoice_item(item_id: int):
     except sqlite3.Error as e:
         raise HTTPException(status_code=500, detail=e.args[0])
 
+def get_invoice_available_items(client_id: int, invoice_id: int, user_id: int):
+    permitted_action: bool = check_permissions(
+            client_id=client_id, current_user_id=user_id
+        )
+    if permitted_action:
+        available_items: list[ActivityReport] = []
+        query = """
+        SELECT DISTINCT
+            ar.id,
+            ar.wo_id,
+            ar.name,
+            ar.date,
+            ar.hours_amount,
+            ar.user_id
+        FROM activity_reports ar
+        INNER JOIN work_orders wo ON ar.wo_id = wo.id
+        INNER JOIN contracts c ON wo.contract_id = c.id
+        INNER JOIN invoices i ON i.client_id = c.client_id
+        WHERE i.id = ?
+            AND ar.user_id = ?
+            AND ar.id NOT IN (
+                SELECT ar_id 
+                FROM invoice_items
+            )
+        ORDER BY ar.date DESC;
+        """
+        data: tuple = (invoice_id,user_id)
+        try:
+            res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            rows: list[tuple] = res.fetchall()
+            for row in rows:
+                activity_report: ActivityReport = ActivityReport(
+                    id=int(row[0]),
+                        wo_id=row[1],
+                        name=row[2],
+                        date=row[3],
+                        hours_amount=row[4],
+                        user_id=row[5],
+                )
+                available_items.append(activity_report)
+            return available_items
+        except sqlite3.OperationalError as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
 
 class Invoice(BaseModel):
     id: int | None = None
