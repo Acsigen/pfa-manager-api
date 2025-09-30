@@ -143,13 +143,13 @@ def show_invoice(user_id:int, invoice_id: int):
         invoice: Invoice = Invoice(
             id=int(row[0]),
             name=row[1],
-            currency=row[2],
-            exchange_rate=row[3],
-            invoice_date=row[4],
-            due_date=row[5],
-            status=row[6],
-            client_id=row[7],
-            user_id=row[8],
+            client_id=int(row[2]),
+            currency=row[3],
+            exchange_rate=row[4],
+            invoice_date=row[5],
+            due_date=row[6],
+            status=row[7],
+            user_id=int(row[8]),
         )
         return invoice
     except sqlite3.IntegrityError as e:
