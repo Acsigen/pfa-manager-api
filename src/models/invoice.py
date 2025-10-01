@@ -158,7 +158,7 @@ def show_invoice(user_id:int, invoice_id: int):
 
 def list_user_invoices(user_id: int):
     invoice_list: list[Invoice] = []
-    query = "SELECT * FROM invoices WHERE user_id = ?"
+    query = "SELECT * FROM invoices WHERE user_id = ? ORDER BY invoice_date DESC"
     data: tuple = (user_id,)
     try:
         res: sqlite3.Cursor = db.execute_query(query=query, params=data)
