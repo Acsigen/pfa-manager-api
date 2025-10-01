@@ -208,18 +208,6 @@ def list_client_invoices(client_id:int, user_id: int):
         except sqlite3.OperationalError as e:
             raise HTTPException(status_code=500, detail=e.args[0])
 
-# TODO: check if invoice exists before deletion for proper output messaging.
-# Currently if a user deletes a non existent invoice, it will confirm. This can cause confusion where we will have multiple invoices
-def delete_invoice(user_id: int, invoice_id: int):
-        query = "DELETE FROM invoices WHERE id == ? AND user_id == ?"
-        data: tuple = (invoice_id,user_id)
-        try:
-            _: sqlite3.Cursor = db.execute_query(query=query, params=data)
-            return True
-        except sqlite3.IntegrityError as e:
-            raise HTTPException(status_code=500, detail=e.args[0])
-
-
 def check_permissions(
     client_id: int, current_user_id: int, invoice_id: int | None = None
 ):
