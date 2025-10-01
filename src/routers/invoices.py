@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from ..models.invoice import Invoice, InvoiceItem, delete_invoice, list_user_invoices, list_client_invoices, show_invoice, delete_invoice_item, get_invoice_available_items
+from ..models.invoice import Invoice, InvoiceItem, list_user_invoices, list_client_invoices, show_invoice, delete_invoice_item, get_invoice_available_items
 from ..models.activity_report import ActivityReport
 from .auth import get_current_user
 from typing import Annotated
@@ -59,9 +59,3 @@ async def list_client_invoices_handler(user: user_dependency, client_id: int):
     invoice_list: list = list_client_invoices(user_id=user.get("user_id"), client_id=client_id)
     if type(invoice_list) is list:
         return invoice_list
-
-
-@router.delete(path="/api/v1/invoices/{invoice_id}")
-async def delete_invoice_handler(user: user_dependency, invoice_id: int):
-    if delete_invoice(user_id=user.get("user_id"), invoice_id=invoice_id):
-        return "Invoice deleted"
