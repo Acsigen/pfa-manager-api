@@ -79,20 +79,38 @@ def get_invoice_items(client_id: int, invoice_id: int, user_id: int):
             client_id=client_id, current_user_id=user_id
         )
     if permitted_action:
-        invoice_items: list[InvoiceItem] = []
+        invoice_items: list[dict] = []
         query = """
-        SELECT * FROM invoice_items where invoice_id = ?
+        SELECT c.contract_no,
+        wo.name,
+        ar.hours_amount,
+        wo.price,
+        wo.currency 
+        FROM activity_reports ar
+        INNER JOIN work_orders wo ON ar.wo_id = wo.id
+        INNER JOIN contracts c ON wo.contract_id = c.id
+        INNER JOIN invoices i ON i.client_id = c.client_id
+        WHERE i.id = ?
+            AND ar.user_id = ?
+            AND ar.id IN (
+                SELECT ar_id 
+                FROM invoice_items
+            )
+        ORDER BY ar.date DESC;
         """
-        data: tuple = (invoice_id,)
+        data: tuple = (invoice_id, user_id)
         try:
             res: sqlite3.Cursor = db.execute_query(query=query, params=data)
             rows: list[tuple] = res.fetchall()
             for row in rows:
-                invoice_item: InvoiceItem = InvoiceItem(
-                    id=int(row[0]),
-                        ar_id=row[1],
-                        invoice_id=row[2],
-                )
+                invoice_item: dict = {
+                    "contract_no": row[0],
+                    "wo_name": row[1],
+                    "hours_amount": float(row[2]),
+                    "price": float(row[3]),
+                    "currency": row[4]
+                }
+                
                 invoice_items.append(invoice_item)
             return invoice_items
         except sqlite3.OperationalError as e:

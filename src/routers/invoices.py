@@ -35,7 +35,7 @@ async def get_invoice_available_items_handler(user: user_dependency, invoice: In
 
 @router.post(path="/api/v1/invoices/{invoice_id}/invoiced_items")
 async def get_invoice_items_handler(user: user_dependency, invoice: Invoice):
-    invoice_items: list[InvoiceItem] = get_invoice_items(client_id=invoice.client_id,invoice_id=invoice.id,user_id=user.get("user_id"))
+    invoice_items: list[dict] = get_invoice_items(client_id=invoice.client_id,invoice_id=invoice.id,user_id=user.get("user_id"))
     return invoice_items
 
 
