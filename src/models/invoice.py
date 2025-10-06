@@ -74,6 +74,30 @@ def get_invoice_available_items(client_id: int, invoice_id: int, user_id: int):
         except sqlite3.OperationalError as e:
             raise HTTPException(status_code=500, detail=e.args[0])
 
+def get_invoice_items(client_id: int, invoice_id: int, user_id: int):
+    permitted_action: bool = check_permissions(
+            client_id=client_id, current_user_id=user_id
+        )
+    if permitted_action:
+        invoice_items: list[InvoiceItem] = []
+        query = """
+        SELECT * FROM invoice_items where invoice_id = ?
+        """
+        data: tuple = (invoice_id,)
+        try:
+            res: sqlite3.Cursor = db.execute_query(query=query, params=data)
+            rows: list[tuple] = res.fetchall()
+            for row in rows:
+                invoice_item: InvoiceItem = InvoiceItem(
+                    id=int(row[0]),
+                        ar_id=row[1],
+                        invoice_id=row[2],
+                )
+                invoice_items.append(invoice_item)
+            return invoice_items
+        except sqlite3.OperationalError as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
+
 class Invoice(BaseModel):
     id: int | None = None
     name: str
