@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from ..models.invoice import Invoice, InvoiceItem, list_user_invoices, list_client_invoices, show_invoice, delete_invoice_item, get_invoice_available_items
+from ..models.invoice import Invoice, InvoiceItem, list_user_invoices, list_client_invoices, show_invoice, delete_invoice_item, get_invoice_available_items, get_invoice_items
 from ..models.activity_report import ActivityReport
 from .auth import get_current_user
 from typing import Annotated
@@ -32,6 +32,11 @@ async def delete_invoice_items_handler(item_id: int):
 async def get_invoice_available_items_handler(user: user_dependency, invoice: Invoice):
     available_items: list[ActivityReport] = get_invoice_available_items(client_id=invoice.client_id,invoice_id=invoice.id,user_id=user.get("user_id"))
     return available_items
+
+@router.post(path="/api/v1/invoices/{invoice_id}/invoiced_items")
+async def get_invoice_items_handler(user: user_dependency, invoice: Invoice):
+    invoice_items: list[InvoiceItem] = get_invoice_items(client_id=invoice.client_id,invoice_id=invoice.id,user_id=user.get("user_id"))
+    return invoice_items
 
 
 @router.put(path="/api/v1/invoices/{invoice_id}")
