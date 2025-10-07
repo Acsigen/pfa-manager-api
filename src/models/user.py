@@ -34,7 +34,6 @@ class User(BaseModel):
 
 def authenticate_user(username: str, password: str):
     email_address: str = username
-    password = password
     query = "SELECT id,password FROM users where email_address == ?"
     data: tuple = (email_address,)
     try:
