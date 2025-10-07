@@ -8,7 +8,6 @@ router: APIRouter = APIRouter(tags=["invoices"])
 
 user_dependency = Annotated[dict, Depends(dependency=get_current_user)]
 
-# TODO: implement list invoice items
 @router.post(path="/api/v1/invoices")
 async def add_invoice_handler(user: user_dependency, invoice: Invoice):
     added_invoice: Invoice = invoice.add(user_id=user.get("user_id"))
