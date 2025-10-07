@@ -3,13 +3,6 @@ import hashlib
 import base64
 import secrets
 
-# def hash_password(password: str):
-#     salt: str | None = os.getenv(key="PFA_SECRET_KEY")
-#     data_salting: bytes = salt.encode() + password.encode()
-#     hash_object = hashlib.sha256(data=data_salting)
-#     hex_digest: str = hash_object.hexdigest()
-#     return hex_digest
-
 """
 Secure password hashing (stdlib only).
 

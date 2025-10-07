@@ -3,6 +3,7 @@ from fastapi import HTTPException
 import sqlite3
 from ..database import db
 
+NOT_FOUND_ERR: str = "No such contract"
 
 class Contract(BaseModel):
     id: int | None = None
@@ -65,7 +66,7 @@ class Contract(BaseModel):
                     _: sqlite3.Cursor = db.execute_query(query=query, params=data)
                     return self
                 else:
-                    raise HTTPException(404, "No such contract")
+                    raise HTTPException(404, NOT_FOUND_ERR)
             except sqlite3.IntegrityError as e:
                 raise HTTPException(500, e.args[0])
 
@@ -96,7 +97,7 @@ def show_contract(contract_id: int, client_id: int, user_id: int):
                 )
                 return contract
             else:
-                raise HTTPException(404, "No such contract")
+                raise HTTPException(404, NOT_FOUND_ERR)
         except sqlite3.Error as e:
             raise HTTPException(500, e.args[0])
 
@@ -146,7 +147,7 @@ def delete_user_contract(contract_id: int, client_id: int, user_id: int):
                 _: sqlite3.Cursor = db.execute_query(query=query, params=data)
                 return True
             else:
-                raise HTTPException(404, "No such contract")
+                raise HTTPException(404, NOT_FOUND_ERR)
         except sqlite3.IntegrityError as e:
             raise HTTPException(500, e.args[0])
 
