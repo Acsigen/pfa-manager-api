@@ -78,6 +78,8 @@ def create_tables(cursor: sqlite3.Cursor):
                 phone_number TEXT,
                 onrc_no TEXT NOT NULL,
                 cui TEXT NOT NULL,
+                pv_sign_template TEXT,
+                wo_sign_template TEXT,
                 user_id INTEGER NOT NULL,
                 UNIQUE(onrc_no, user_id),
                 UNIQUE(cui, user_id),
