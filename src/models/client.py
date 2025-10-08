@@ -13,10 +13,12 @@ class Client(BaseModel):
     phone_number: str | None = None
     onrc_no: str
     cui: str
+    pv_sign_template: str | None
+    wo_sign_template: str | None
     user_id: int | None = None
 
     def add(self, user_id: int):
-        query = "INSERT INTO clients(name, address, contact_person, country, phone_number, onrc_no, cui, user_id) VALUES (?,?,?,?,?,?,?,?)"
+        query = "INSERT INTO clients(name, address, contact_person, country, phone_number, onrc_no, cui, pv_sign_template, wo_sign_template, user_id) VALUES (?,?,?,?,?,?,?,?,?,?)"
         self.user_id = user_id
         data = (
             self.name,
@@ -26,6 +28,8 @@ class Client(BaseModel):
             self.phone_number,
             self.onrc_no,
             self.cui,
+            self.pv_sign_template,
+            self.wo_sign_template,
             self.user_id,
         )
         try:
@@ -40,7 +44,7 @@ class Client(BaseModel):
             client_id=client_id, current_user_id=user_id
         )
         if permitted_action:
-            query = "UPDATE clients	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?	WHERE id == ? AND user_id == ?"
+            query = "UPDATE clients	SET name = ?, address = ?, contact_person = ?, country = ?, phone_number = ?, onrc_no = ?, cui = ?, pv_sign_template = ?, wo_sign_template = ? WHERE id == ? AND user_id == ?"
             self.user_id = user_id
             self.id = client_id
             data = (
@@ -51,6 +55,8 @@ class Client(BaseModel):
                 self.phone_number,
                 self.onrc_no,
                 self.cui,
+                self.pv_sign_template,
+                self.wo_sign_template,
                 self.id,
                 self.user_id,
             )
@@ -80,7 +86,9 @@ def show_user_client(client_id: int, user_id: int):
                 phone_number=row[5],
                 onrc_no=row[6],
                 cui=row[7],
-                user_id=int(row[8]),
+                pv_sign_template=row[8],
+                wo_sign_template=row[9],
+                user_id=int(row[10]),
             )
             return client
         except sqlite3.IntegrityError as e:
@@ -104,7 +112,9 @@ def list_user_clients(user_id: int):
                 phone_number=row[5],
                 onrc_no=row[6],
                 cui=row[7],
-                user_id=int(row[8]),
+                pv_sign_template=row[8],
+                wo_sign_template=row[9],
+                user_id=int(row[10]),
             )
             client_list.append(client)
         return client_list
