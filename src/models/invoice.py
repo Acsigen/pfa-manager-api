@@ -82,20 +82,17 @@ def get_invoice_items(client_id: int, invoice_id: int, user_id: int):
         invoice_items: list[dict] = []
         query = """
         SELECT c.contract_no,
-        wo.name,
-        ar.hours_amount,
-        wo.price,
-        wo.currency 
+            wo.name,
+            ar.hours_amount,
+            wo.price,
+            wo.currency 
         FROM activity_reports ar
         INNER JOIN work_orders wo ON ar.wo_id = wo.id
         INNER JOIN contracts c ON wo.contract_id = c.id
-        INNER JOIN invoices i ON i.client_id = c.client_id
+        INNER JOIN invoice_items ii ON ii.ar_id = ar.id
+        INNER JOIN invoices i ON i.id = ii.invoice_id
         WHERE i.id = ?
             AND ar.user_id = ?
-            AND ar.id IN (
-                SELECT ar_id 
-                FROM invoice_items
-            )
         ORDER BY ar.date DESC;
         """
         data: tuple = (invoice_id, user_id)
